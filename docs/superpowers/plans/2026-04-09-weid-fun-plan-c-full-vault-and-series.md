@@ -572,7 +572,7 @@ git commit -m "feat(primitive): add AudioPad with click-to-play for mobile compa
 - Create: `src/reference-vault/README.md`
 - Create: `src/reference-vault/.gitkeep`
 
-- [ ] **Step 4.1: 写 README.md**
+- [x] **Step 4.1: 写 README.md**
 
 ```markdown
 # Reference Vault
@@ -609,7 +609,7 @@ reference images from this directory and asks:
   personal taste artifacts and belong on the personal branch
 ```
 
-- [ ] **Step 4.2: .gitkeep（main 分支会 ignore 具体内容但保留目录）**
+- [x] **Step 4.2: .gitkeep（main 分支会 ignore 具体内容但保留目录）**
 
 ```bash
 echo "" > src/reference-vault/.gitkeep
@@ -624,7 +624,7 @@ Note: `.gitignore` 的规则是 `/src/reference-vault/*` with `!/src/reference-v
 
 这个修改在 Task 14 statute (personal branch prep) 里一起处理。Task 4 先提交 README 和 .gitkeep。
 
-- [ ] **Step 4.3: 提交**
+- [x] **Step 4.3: 提交**
 
 ```bash
 git add src/reference-vault/README.md src/reference-vault/.gitkeep
