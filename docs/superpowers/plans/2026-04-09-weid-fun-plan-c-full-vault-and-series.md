@@ -746,7 +746,7 @@ git commit -m "feat(standards): add hard rules custom merge with example"
 **Files:**
 - Create: `src/standards/review-prompt.md`
 
-- [ ] **Step 6.1: 写 review-prompt.md**
+- [x] **Step 6.1: 写 review-prompt.md**
 
 ```markdown
 You are evaluating a newly generated article page for weid.fun, a personal blog where
@@ -807,7 +807,7 @@ If `pass: false`, include 2-5 concrete suggestions for what to change in the pag
 Be specific: "increase hero title font size on mobile" not "improve mobile experience".
 ```
 
-- [ ] **Step 6.2: 提交**
+- [x] **Step 6.2: 提交**
 
 ```bash
 git add src/standards/review-prompt.md
