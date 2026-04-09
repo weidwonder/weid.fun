@@ -867,7 +867,7 @@ git commit -m "feat(publish): add /publish SKILL.md orchestration doc"
 **Files:**
 - Create: `scripts/publish/organize-source.ts`
 
-- [ ] **Step 6.1: 写 organize-source.ts**
+- [x] **Step 6.1: 写 organize-source.ts**
 
 ```ts
 #!/usr/bin/env bun
@@ -994,7 +994,7 @@ main().catch((err) => {
 })
 ```
 
-- [ ] **Step 6.2: 提交**
+- [x] **Step 6.2: 提交**
 
 ```bash
 git add scripts/publish/organize-source.ts
