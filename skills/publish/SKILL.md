@@ -9,20 +9,36 @@ You are executing the publish pipeline for weid.fun. Follow the steps **in order
 
 ## Input Parsing
 
-The user invokes you as:
-
 ```bash
 /publish [path] [--series <name>] [--pin] [--slug <custom>]
 ```
 
-- `path` — 若提供：文件夹模式，从 `path` 读取 raw materials。若不提供：对话模式（Plan B 不支持对话模式，请直接提示用户使用文件夹模式）。
+### 文件夹模式（传 path）
+
+用户直接指定 inbox 路径。跳到 Pipeline Steps。
+
+### 对话模式（不传 path）
+
+**Step A** · 从当前对话上下文抓取用户最近的 markdown 内容。这应该是用户最新的一条 user message，通常包含：
+- 一段 markdown 文本（主体内容）
+- 零个或多个图片附件（Claude Code 作为 image block 传入）
+- 可能的指令（“发布这个”、“系列 X”等）
+
+**Step B** · 创建临时 inbox 目录 `inbox/_conversation-<ISO-timestamp>/`：
+```bash
+TS=$(date +%Y%m%dT%H%M%S)
+mkdir -p inbox/_conversation-$TS/attachments
+```
+
+**Step C** · 把对话里的 markdown 内容写到 `inbox/_conversation-$TS/raw.md`。
+
+**Step D** · 对每个图片附件，保存到 `inbox/_conversation-$TS/attachments/<index>.<ext>`。用 Write 工具写入 base64 decode 后的 bytes。
+
+**Step E** · 然后把这个目录当作文件夹模式的输入，进入 Pipeline Steps。
+
 - `--series <name>` — 系列名
 - `--pin` — 是否在首页橱窗置顶
 - `--slug <custom>` — 自定义 slug；不提供时从 `raw.md` 标题生成
-
-**MVP 限制**：Plan B 只支持**文件夹模式**。若用户没传 path，回复：
-> Plan B 只支持文件夹模式。请把材料整理到 `inbox/<your-name>/` 后再运行：
-> `/publish inbox/<your-name>`
 
 ## Pipeline Steps
 

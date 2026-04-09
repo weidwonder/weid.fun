@@ -1090,7 +1090,7 @@ git commit -m "feat(publish): upgrade SKILL.md self-review to two-stage"
 **Files:**
 - Modify: `skills/publish/SKILL.md`
 
-- [ ] **Step 9.1: 修改 SKILL.md 的 Input Parsing 段**
+- [x] **Step 9.1: 修改 SKILL.md 的 Input Parsing 段**
 
 找到 Plan B 写的 MVP 限制段（`Plan B 只支持文件夹模式`），替换为：
 
@@ -1123,7 +1123,7 @@ mkdir -p inbox/_conversation-$TS/attachments
 **Step E** · 然后把这个目录当作文件夹模式的输入，进入 Pipeline Steps。
 ```
 
-- [ ] **Step 9.2: 提交**
+- [x] **Step 9.2: 提交**
 
 ```bash
 git add skills/publish/SKILL.md
