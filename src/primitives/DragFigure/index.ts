@@ -1,0 +1,1 @@
+export { DragFigure } from './DragFigure'

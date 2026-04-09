@@ -250,7 +250,7 @@ git commit -m "feat(primitive): add ScrollReveal with IntersectionObserver"
 - Create: `src/playground/drag-figure/{index.html, main.tsx, page.tsx}`
 - Create: `tests/drag-figure.spec.ts`
 
-- [ ] **Step 2.1: 写测试**
+- [x] **Step 2.1: 写测试**
 
 ```ts
 import { test, expect } from '@playwright/test'
@@ -288,7 +288,7 @@ test.describe('DragFigure primitive', () => {
 })
 ```
 
-- [ ] **Step 2.2: 写 DragFigure.tsx（用 @use-gesture/react 统一 pointer events）**
+- [x] **Step 2.2: 写 DragFigure.tsx（用 @use-gesture/react 统一 pointer events）**
 
 ```tsx
 import { useState, type ReactNode } from 'react'
@@ -342,13 +342,13 @@ export function DragFigure({
 }
 ```
 
-- [ ] **Step 2.3: 写 index.ts**
+- [x] **Step 2.3: 写 index.ts**
 
 ```ts
 export { DragFigure } from './DragFigure'
 ```
 
-- [ ] **Step 2.4: 写 playground 页面**
+- [x] **Step 2.4: 写 playground 页面**
 
 `src/playground/drag-figure/page.tsx`:
 ```tsx
@@ -373,7 +373,7 @@ export function PlaygroundPage() {
 
 index.html 和 main.tsx 参考 ScrollReveal playground 模板。
 
-- [ ] **Step 2.5: 跑测试**
+- [x] **Step 2.5: 跑测试**
 
 ```bash
 bun x playwright test tests/drag-figure.spec.ts
@@ -381,7 +381,7 @@ bun x playwright test tests/drag-figure.spec.ts
 
 Expected: 所有 test PASS。
 
-- [ ] **Step 2.6: 提交**
+- [x] **Step 2.6: 提交**
 
 ```bash
 git add src/primitives/DragFigure/ src/playground/drag-figure/ tests/drag-figure.spec.ts
