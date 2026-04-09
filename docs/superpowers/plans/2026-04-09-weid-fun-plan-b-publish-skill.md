@@ -1010,7 +1010,7 @@ git commit -m "feat(publish): add organize-source.ts"
 **Files:**
 - Create: `scripts/publish/extract-palette.ts`
 
-- [ ] **Step 7.1: 安装依赖 color-thief**
+- [x] **Step 7.1: 安装依赖 color-thief**
 
 Run:
 ```bash
@@ -1019,7 +1019,7 @@ bun add -d sharp
 
 > **说明**：用 `sharp` 读图 + 手动求平均色。color-thief 的 Node 版本依赖 canvas，编译麻烦，用 sharp 更可靠。
 
-- [ ] **Step 7.2: 写 extract-palette.ts**
+- [x] **Step 7.2: 写 extract-palette.ts**
 
 ```ts
 #!/usr/bin/env bun
@@ -1112,7 +1112,7 @@ main().catch((err) => {
 })
 ```
 
-- [ ] **Step 7.3: 提交**
+- [x] **Step 7.3: 提交**
 
 ```bash
 git add scripts/publish/extract-palette.ts package.json bun.lock
