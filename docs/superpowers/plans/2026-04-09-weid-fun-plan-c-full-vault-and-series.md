@@ -1142,14 +1142,14 @@ git commit -m "feat(publish): add conversation mode input handling"
 - Create: `series/.gitkeep`
 - Modify: `skills/publish/SKILL.md`
 
-- [ ] **Step 10.1: 创建 series 目录**
+- [x] **Step 10.1: 创建 series 目录**
 
 ```bash
 mkdir -p series
 touch series/.gitkeep
 ```
 
-- [ ] **Step 10.2: 写 series-read.ts**
+- [x] **Step 10.2: 写 series-read.ts**
 
 ```ts
 #!/usr/bin/env bun
@@ -1187,7 +1187,7 @@ function main() {
 main()
 ```
 
-- [ ] **Step 10.3: 写 series-write.ts**
+- [x] **Step 10.3: 写 series-write.ts**
 
 ```ts
 #!/usr/bin/env bun
@@ -1254,7 +1254,7 @@ function main() {
 main()
 ```
 
-- [ ] **Step 10.4: 修改 SKILL.md 的 Pipeline Steps**
+- [x] **Step 10.4: 修改 SKILL.md 的 Pipeline Steps**
 
 在 Step 3 (生成 page.tsx) **之前**插入一个新 step：
 
@@ -1287,7 +1287,7 @@ bun run scripts/publish/series-write.ts <series-name> <slug>
 这会把本文的风格决策写入 `series/<series-name>/spec.json`。
 ```
 
-- [ ] **Step 10.5: 提交**
+- [x] **Step 10.5: 提交**
 
 ```bash
 git add scripts/publish/series-read.ts scripts/publish/series-write.ts series/.gitkeep skills/publish/SKILL.md

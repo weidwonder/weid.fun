@@ -63,6 +63,19 @@ bun run scripts/publish/extract-palette.ts <slug>
 
 这个脚本会从 `articles/<slug>/source/attachments/` 的第一张图提取主色，写回 `meta.json.colors`。如果没有图片，使用默认色（`#8338ec`）。
 
+### Step 2.5 · 读系列 spec
+
+如果 `--series <name>` 被提供：
+
+```bash
+bun run scripts/publish/series-read.ts <series-name>
+```
+
+- 若输出 `FIRST`：本文是系列首篇。自由设计 `page.tsx`（按 Step 3 模板，但 primitives 和 colors 自由）。完成后，记住要在 Step 9 写 series spec。
+- 若输出 JSON：读取 spec，在 Step 3 写 `page.tsx` 时**必须遵守**：
+  - 使用 `spec.colors` 作为 `meta.json.colors`（覆盖 extract-palette 的结果）
+  - 只使用 `spec.primitives` 列出的 primitives（不能引入新的）
+
 ### Step 3 · 生成 page.tsx
 
 Read `articles/<slug>/source/raw.md` 和 `articles/<slug>/meta.json`。然后**你亲自**写 `articles/<slug>/page.tsx`。
@@ -195,6 +208,16 @@ Article: articles/<slug>/
 Preview: bun run preview → http://localhost:4173/src/articles/<slug>/
 Deploy: ./scripts/deploy.sh
 ```
+
+### Step 9 · 若系列首篇，写 spec
+
+如果 Step 2.5 返回了 `FIRST`，执行：
+
+```bash
+bun run scripts/publish/series-write.ts <series-name> <slug>
+```
+
+这会把本文的风格决策写入 `series/<series-name>/spec.json`。
 
 ## 禁令
 
