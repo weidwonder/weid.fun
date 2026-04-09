@@ -50,28 +50,3 @@ Thumbs.db
 
 # -------- 文件夹模式的暂存区（永远本地） --------
 /inbox/
-
-# ============================================================
-# 👇 以下是「个人内容」：仅在 main (framework) 分支 ignore
-# ============================================================
-# 在 personal 分支中，这一段会被删除或注释掉，让这些内容
-# 可以被 git 追踪。
-
-# 所有文章（原始材料 + 生成产物）
-/src/articles/
-# 也兼容把 articles 放在顶层的写法
-/articles/
-
-# 系列规范（由首篇生成，属于个人风格积累）
-/series/
-
-# 品味参考画廊
-/src/reference-vault/*
-!/src/reference-vault/.gitkeep
-!/src/reference-vault/README.md
-
-# 作者自定义的 hard rules（在 baseline 之外叠加的个人规则）
-/src/standards/hard-rules.custom.md
-
-# 首页动态数据（文章列表 / portal 配置）
-/src/home/home-data.json
