@@ -359,7 +359,7 @@ git commit -m "feat(primitive): add WebGLHero with r3f, shader, mobile DPR limit
 
 > **注**：playground 是框架分支的永久资产（用于开发时快速验证 primitives）。会被 Vite 的 `discoverEntries` 自动发现。
 
-- [ ] **Step 3.1: 扩展 vite.config.ts 支持 playground**
+- [x] **Step 3.1: 扩展 vite.config.ts 支持 playground**
 
 修改 `vite.config.ts` 的 `discoverEntries`，在 articles 之后追加 playground 扫描：
 
@@ -378,7 +378,7 @@ git commit -m "feat(primitive): add WebGLHero with r3f, shader, mobile DPR limit
   }
 ```
 
-- [ ] **Step 3.2: 写 src/playground/webgl-hero/index.html**
+- [x] **Step 3.2: 写 src/playground/webgl-hero/index.html**
 
 ```html
 <!doctype html>
@@ -401,7 +401,7 @@ git commit -m "feat(primitive): add WebGLHero with r3f, shader, mobile DPR limit
 
 修改 `tests/webgl-hero.spec.ts` 里的 `page.goto('/playground/webgl-hero/')` 为 `page.goto('/src/playground/webgl-hero/')`。
 
-- [ ] **Step 3.3: 写 src/playground/webgl-hero/main.tsx**
+- [x] **Step 3.3: 写 src/playground/webgl-hero/main.tsx**
 
 ```tsx
 import React from 'react'
@@ -416,7 +416,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
 )
 ```
 
-- [ ] **Step 3.4: 写 src/playground/webgl-hero/page.tsx**
+- [x] **Step 3.4: 写 src/playground/webgl-hero/page.tsx**
 
 ```tsx
 import { WebGLHero } from '@/primitives/WebGLHero'
@@ -437,7 +437,7 @@ export function PlaygroundPage() {
 }
 ```
 
-- [ ] **Step 3.5: 跑 build 确认 playground entry 被发现**
+- [x] **Step 3.5: 跑 build 确认 playground entry 被发现**
 
 Run:
 ```bash
@@ -446,7 +446,7 @@ bun run build
 
 Expected: `[vite] discovered entries: home, playground_webgl-hero`，`dist/src/playground/webgl-hero/index.html` 存在。
 
-- [ ] **Step 3.6: 更新测试里的路径并运行**
+- [x] **Step 3.6: 更新测试里的路径并运行**
 
 编辑 `tests/webgl-hero.spec.ts`，把 4 个 `page.goto('/playground/webgl-hero/')` 改为 `page.goto('/src/playground/webgl-hero/')`。
 
@@ -457,7 +457,7 @@ bun x playwright test tests/webgl-hero.spec.ts --project=desktop
 
 Expected: 4 个 test PASS。
 
-- [ ] **Step 3.7: 跑全部断点**
+- [x] **Step 3.7: 跑全部断点**
 
 ```bash
 bun x playwright test tests/webgl-hero.spec.ts
@@ -465,7 +465,7 @@ bun x playwright test tests/webgl-hero.spec.ts
 
 Expected: 12 test (4 × 3 project) 全 PASS。
 
-- [ ] **Step 3.8: 提交**
+- [x] **Step 3.8: 提交**
 
 ```bash
 git add src/playground/ vite.config.ts tests/webgl-hero.spec.ts

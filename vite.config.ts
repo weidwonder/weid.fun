@@ -31,6 +31,17 @@ function discoverEntries(): Record<string, string> {
     }
   }
 
+  const playgroundRoot = path.resolve(projectRoot, 'src/playground')
+  if (fs.existsSync(playgroundRoot)) {
+    for (const item of fs.readdirSync(playgroundRoot, { withFileTypes: true })) {
+      if (!item.isDirectory()) continue
+      const entry = path.join(playgroundRoot, item.name, 'index.html')
+      if (fs.existsSync(entry)) {
+        entries[`playground_${item.name}`] = entry
+      }
+    }
+  }
+
   return entries
 }
 
