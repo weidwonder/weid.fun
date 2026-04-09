@@ -86,7 +86,7 @@ weid.fun/
 
 **Files:** `package.json`, `bun.lock`
 
-- [ ] **Step 1.1: 安装依赖**
+- [x] **Step 1.1: 安装依赖**
 
 Run:
 ```bash
@@ -96,7 +96,7 @@ bun add -d @types/three
 
 Expected: package.json 新增 4 个 dependency + 1 个 devDependency。
 
-- [ ] **Step 1.2: 确认 tsc 无错**
+- [x] **Step 1.2: 确认 tsc 无错**
 
 Run:
 ```bash
@@ -105,7 +105,7 @@ bun x tsc --noEmit
 
 Expected: 无错误。
 
-- [ ] **Step 1.3: 提交**
+- [x] **Step 1.3: 提交**
 
 ```bash
 git add package.json bun.lock
