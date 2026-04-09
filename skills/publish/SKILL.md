@@ -136,21 +136,38 @@ bun run build
 
 期望：没有构建错误。如果有，**不要 escalate**，而是读错误消息修 `page.tsx` 直到构建通过。
 
-### Step 7 · 自审循环
+### Step 7 · 自审循环（机械 + Vision 两阶段）
+
+**阶段 1: 机械检查**
 
 ```bash
 bun run scripts/self-review.ts /src/articles/<slug>/
 ```
 
 读取输出 JSON。
-- 若 `pass=true`：进入 Step 8
-- 若 `pass=false` 且已迭代 <3 次：读 issues，修改 `page.tsx`，回到 Step 6
-- 若 `pass=false` 且迭代 ≥3 次：stop。报告给用户：
+- 若 `pass=false`：读 issues，修改 `page.tsx`，回到 Step 6（build）
+- 若 `pass=true`：进入阶段 2
 
-> `/publish` failed self-review after 3 iterations. Issues:
-> [list of issues]
->
-> The article folder is at `articles/<slug>/`. You can inspect `page.tsx` and fix manually.
+**阶段 2: Claude Vision 评审（需要 ANTHROPIC_API_KEY）**
+
+检查环境变量：
+```bash
+[ -n "$ANTHROPIC_API_KEY" ] && echo "ok" || echo "skip"
+```
+
+- 若 `skip`：跳过阶段 2，直接进入 Step 8。在最终报告里标注 `vision review skipped (no API key)`
+- 若 `ok`：运行
+
+```bash
+bun run scripts/publish/vision-review.ts <slug>
+```
+
+读取输出 JSON：
+- 若 `pass=true`：进入 Step 8
+- 若 `pass=false` 且已迭代 <3 次：读 suggestions，修改 `page.tsx`，回到 Step 6
+- 若 `pass=false` 且迭代 ≥3 次：stop。报告所有 `hardRuleViolations` 和 `issues` 给用户
+
+**迭代次数计数**：机械检查和 vision 评审共享同一个迭代计数器，总上限 3。
 
 ### Step 8 · 完成报告
 

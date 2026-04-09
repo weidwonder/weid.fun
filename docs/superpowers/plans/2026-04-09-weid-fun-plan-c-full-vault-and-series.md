@@ -1027,7 +1027,7 @@ git commit -m "feat(publish): add vision-review.ts with claude vision api"
 **Files:**
 - Modify: `skills/publish/SKILL.md`
 
-- [ ] **Step 8.1: 修改 SKILL.md 的 Step 7 （自审循环）**
+- [x] **Step 8.1: 修改 SKILL.md 的 Step 7 （自审循环）**
 
 找到 Plan B 写的 `### Step 7 · 自审循环`，替换为：
 
@@ -1066,7 +1066,7 @@ bun run scripts/publish/vision-review.ts <slug>
 **迭代次数计数**：机械检查和 vision 评审**共享同一个迭代计数器**，总上限 3。
 ```
 
-- [ ] **Step 8.2: 提交**
+- [x] **Step 8.2: 提交**
 
 ```bash
 git add skills/publish/SKILL.md
