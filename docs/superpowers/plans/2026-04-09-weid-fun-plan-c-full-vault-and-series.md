@@ -824,13 +824,13 @@ git commit -m "feat(standards): add review-prompt.md for claude vision eval"
 - Create: `scripts/publish/vision-review.ts`
 - Modify: `scripts/self-review.ts`
 
-- [ ] **Step 7.1: 安装 @anthropic-ai/sdk**
+- [x] **Step 7.1: 安装 @anthropic-ai/sdk**
 
 ```bash
 bun add @anthropic-ai/sdk
 ```
 
-- [ ] **Step 7.2: 写 vision-review.ts**
+- [x] **Step 7.2: 写 vision-review.ts**
 
 ```ts
 #!/usr/bin/env bun
@@ -1011,7 +1011,7 @@ main().catch((err) => {
 
 首先需要在 Task 10 之后才有真实的 article 可测。这一步**延后到 Task 12**。先提交脚本本身。
 
-- [ ] **Step 7.4: 提交**
+- [x] **Step 7.4: 提交**
 
 ```bash
 git add scripts/publish/vision-review.ts package.json bun.lock
