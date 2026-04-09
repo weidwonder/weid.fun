@@ -1,0 +1,1 @@
+export { WebGLHero } from './WebGLHero'

@@ -126,7 +126,7 @@ git commit -m "chore(deps): add three/r3f/drei/use-gesture/react-markdown for ti
 
 ### 2a. 先写测试
 
-- [ ] **Step 2.1: 写 tests/webgl-hero.spec.ts**
+- [x] **Step 2.1: 写 tests/webgl-hero.spec.ts**
 
 ```ts
 import { test, expect } from '@playwright/test'
@@ -167,7 +167,7 @@ test.describe('WebGLHero primitive', () => {
 
 ### 2b. 实现 WebGLScene.tsx（Three.js scene）
 
-- [ ] **Step 2.2: 写 WebGLScene.tsx**
+- [x] **Step 2.2: 写 WebGLScene.tsx**
 
 ```tsx
 import { useRef, useMemo } from 'react'
@@ -252,7 +252,7 @@ export function WebGLScene({ primaryColor, isMobile }: WebGLSceneProps) {
 
 ### 2c. 实现 WebGLHero.tsx（React wrapper）
 
-- [ ] **Step 2.3: 写 WebGLHero.tsx**
+- [x] **Step 2.3: 写 WebGLHero.tsx**
 
 ```tsx
 import { useState, useEffect } from 'react'
@@ -333,13 +333,13 @@ export function WebGLHero({
 }
 ```
 
-- [ ] **Step 2.4: 写 index.ts**
+- [x] **Step 2.4: 写 index.ts**
 
 ```ts
 export { WebGLHero } from './WebGLHero'
 ```
 
-- [ ] **Step 2.5: 提交 primitive 本身（测试此时还失败，因为 playground 页面不存在）**
+- [x] **Step 2.5: 提交 primitive 本身（测试此时还失败，因为 playground 页面不存在）**
 
 ```bash
 git add src/primitives/WebGLHero/ tests/webgl-hero.spec.ts
