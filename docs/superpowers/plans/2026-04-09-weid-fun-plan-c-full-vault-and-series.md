@@ -400,7 +400,7 @@ git commit -m "feat(primitive): add DragFigure with @use-gesture/react unified p
 - Create: `src/playground/audio-pad/{index.html, main.tsx, page.tsx}`
 - Create: `tests/audio-pad.spec.ts`
 
-- [ ] **Step 3.1: 写测试**
+- [x] **Step 3.1: 写测试**
 
 ```ts
 import { test, expect } from '@playwright/test'
@@ -430,7 +430,7 @@ test.describe('AudioPad primitive', () => {
 })
 ```
 
-- [ ] **Step 3.2: 写 AudioPad.tsx**
+- [x] **Step 3.2: 写 AudioPad.tsx**
 
 ```tsx
 import { useRef, useState, useEffect } from 'react'
@@ -523,7 +523,7 @@ export function AudioPad({
 }
 ```
 
-- [ ] **Step 3.3: 写 playground**
+- [x] **Step 3.3: 写 playground**
 
 `src/playground/audio-pad/page.tsx`:
 ```tsx
@@ -547,7 +547,7 @@ export function PlaygroundPage() {
 }
 ```
 
-- [ ] **Step 3.4: 跑测试**
+- [x] **Step 3.4: 跑测试**
 
 ```bash
 bun x playwright test tests/audio-pad.spec.ts
@@ -555,7 +555,7 @@ bun x playwright test tests/audio-pad.spec.ts
 
 Expected: 全 PASS。
 
-- [ ] **Step 3.5: 提交**
+- [x] **Step 3.5: 提交**
 
 ```bash
 git add src/primitives/AudioPad/ src/playground/audio-pad/ tests/audio-pad.spec.ts
