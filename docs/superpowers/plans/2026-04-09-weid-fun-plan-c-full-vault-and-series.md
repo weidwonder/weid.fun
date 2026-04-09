@@ -1463,7 +1463,7 @@ Expected: `HTTP/2 200`。
 - Create: `docs/personal-branch-setup.md`
 - Modify (on personal branch only): `.gitignore`
 
-- [ ] **Step 14.1: 写 docs/personal-branch-setup.md**
+- [x] **Step 14.1: 写 docs/personal-branch-setup.md**
 
 ```markdown
 # Personal Branch Setup
@@ -1582,7 +1582,7 @@ git push origin-private personal
 然后可以用不同的 remote 分别推送。
 ```
 
-- [ ] **Step 14.2: 提交 docs（在 main 分支）**
+- [x] **Step 14.2: 提交 docs（在 main 分支）**
 
 ```bash
 git add docs/personal-branch-setup.md
