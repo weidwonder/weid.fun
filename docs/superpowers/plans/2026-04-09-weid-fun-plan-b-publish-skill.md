@@ -676,7 +676,7 @@ git commit -m "feat(publish): add self-review.ts with 3-breakpoint mechanical ch
 **Files:**
 - Create: `skills/publish/SKILL.md`
 
-- [ ] **Step 5.1: 写 SKILL.md**
+- [x] **Step 5.1: 写 SKILL.md**
 
 ```markdown
 ---
@@ -851,7 +851,7 @@ Deploy: ./scripts/deploy.sh
 - **不要**commit（让用户自己决定是否 commit）
 ```
 
-- [ ] **Step 5.2: 提交**
+- [x] **Step 5.2: 提交**
 
 ```bash
 git add skills/publish/SKILL.md
