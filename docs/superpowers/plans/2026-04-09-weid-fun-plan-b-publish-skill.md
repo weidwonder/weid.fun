@@ -481,7 +481,7 @@ git commit -m "feat(playground): add WebGLHero playground page, all tests pass"
 **Files:**
 - Create: `scripts/self-review.ts`
 
-- [ ] **Step 4.1: 写 self-review.ts**
+- [x] **Step 4.1: 写 self-review.ts**
 
 ```ts
 #!/usr/bin/env bun
@@ -651,7 +651,7 @@ main().catch((err) => {
 })
 ```
 
-- [ ] **Step 4.2: 本地测首页**
+- [x] **Step 4.2: 本地测首页**
 
 Run:
 ```bash
@@ -660,7 +660,7 @@ bun run build && bun run scripts/self-review.ts /
 
 Expected: 打印一个 JSON，`pass: true`，退出码 0。
 
-- [ ] **Step 4.3: 提交**
+- [x] **Step 4.3: 提交**
 
 ```bash
 git add scripts/self-review.ts
