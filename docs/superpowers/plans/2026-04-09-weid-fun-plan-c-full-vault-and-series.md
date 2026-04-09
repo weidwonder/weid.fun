@@ -73,7 +73,7 @@ weid.fun/
 - Create: `src/playground/scroll-reveal/page.tsx`
 - Create: `tests/scroll-reveal.spec.ts`
 
-- [ ] **Step 1.1: 写测试**
+- [x] **Step 1.1: 写测试**
 
 `tests/scroll-reveal.spec.ts`:
 ```ts
@@ -107,7 +107,7 @@ test.describe('ScrollReveal primitive', () => {
 })
 ```
 
-- [ ] **Step 1.2: 写 ScrollReveal.tsx**
+- [x] **Step 1.2: 写 ScrollReveal.tsx**
 
 ```tsx
 import { useRef, useEffect, useState, type ReactNode } from 'react'
@@ -183,13 +183,13 @@ export function ScrollReveal({
 }
 ```
 
-- [ ] **Step 1.3: 写 index.ts**
+- [x] **Step 1.3: 写 index.ts**
 
 ```ts
 export { ScrollReveal } from './ScrollReveal'
 ```
 
-- [ ] **Step 1.4: 写 playground 页面**
+- [x] **Step 1.4: 写 playground 页面**
 
 `src/playground/scroll-reveal/index.html`: 参考 Plan B Task 3.2 的模板。
 
@@ -223,7 +223,7 @@ export function PlaygroundPage() {
 }
 ```
 
-- [ ] **Step 1.5: 跑测试**
+- [x] **Step 1.5: 跑测试**
 
 ```bash
 bun x playwright test tests/scroll-reveal.spec.ts
@@ -231,7 +231,7 @@ bun x playwright test tests/scroll-reveal.spec.ts
 
 Expected: 9 test (3 × 3 project) PASS。
 
-- [ ] **Step 1.6: 提交**
+- [x] **Step 1.6: 提交**
 
 ```bash
 git add src/primitives/ScrollReveal/ src/playground/scroll-reveal/ tests/scroll-reveal.spec.ts
