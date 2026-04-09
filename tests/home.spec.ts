@@ -27,3 +27,22 @@ test.describe('HomePage · Portal (D 区)', () => {
     await expect(enter).toContainText('ENTER')
   })
 })
+
+test.describe('HomePage · Vitrine (C 区)', () => {
+  test('空 articles 时显示 placeholder', async ({ page }) => {
+    await page.goto('/')
+    const empty = page.locator('[data-testid="vitrine-empty"]')
+    await empty.scrollIntoViewIfNeeded()
+    await expect(empty).toBeVisible()
+    await expect(empty).toContainText('no writings yet')
+  })
+
+  test('Vitrine 区在 Portal 下方（滚动可见）', async ({ page }) => {
+    await page.goto('/')
+    const vitrine = page.locator('[data-testid="vitrine"]')
+    await expect(vitrine).toBeAttached()
+    const box = await vitrine.boundingBox()
+    const viewport = page.viewportSize()!
+    expect(box!.y).toBeGreaterThanOrEqual(viewport.height - 100)
+  })
+})
