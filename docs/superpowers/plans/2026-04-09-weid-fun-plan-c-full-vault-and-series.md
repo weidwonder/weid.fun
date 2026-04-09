@@ -1305,7 +1305,7 @@ git commit -m "feat(publish): add series mechanism with spec.json read/write"
 **Files:**
 - Modify: `skills/publish/SKILL.md`
 
-- [ ] **Step 11.1: 修改 SKILL.md，在 Step 2 (extract-palette) 之后插入 Step 2.7 (illustrate)**
+- [x] **Step 11.1: 修改 SKILL.md，在 Step 2 (extract-palette) 之后插入 Step 2.7 (illustrate)**
 
 ```markdown
 ### Step 2.7 · 补充配图（可选）
@@ -1327,7 +1327,7 @@ git commit -m "feat(publish): add series mechanism with spec.json read/write"
 **如果 baoyu-article-illustrator 失败**：跳过，记录 warning，继续后续步骤。不要让插图步骤阻塞发布。
 ```
 
-- [ ] **Step 11.2: 提交**
+- [x] **Step 11.2: 提交**
 
 ```bash
 git add skills/publish/SKILL.md

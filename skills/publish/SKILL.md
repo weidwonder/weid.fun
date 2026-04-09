@@ -76,6 +76,24 @@ bun run scripts/publish/series-read.ts <series-name>
   - 使用 `spec.colors` 作为 `meta.json.colors`（覆盖 extract-palette 的结果）
   - 只使用 `spec.primitives` 列出的 primitives（不能引入新的）
 
+### Step 2.7 · 补充配图（可选）
+
+如果用户传了 `--no-illustrate`，跳过此步。
+
+否则，**主动调用 `baoyu-article-illustrator` skill**：
+
+1. 读取 `articles/<slug>/source/raw.md` 作为文章内容
+2. 读取 `articles/<slug>/meta.json` 的 `colors.primary` 作为配色参考
+3. 调用 `baoyu-article-illustrator` skill，传入 markdown 和期望的 illustration positions
+4. 让它产出 N 张图片
+5. 把产出的图片保存到 `articles/<slug>/assets/`
+6. 记录每张图对应 markdown 的哪段（用于 Step 3 的 `page.tsx` 生成）
+
+**重要**：`baoyu-article-illustrator` 是独立 skill，它的调用方式见该 skill 的 `SKILL.md`。
+`/publish` 不应该 reimplement 它，只负责 orchestrate 调用。
+
+**如果 baoyu-article-illustrator 失败**：跳过，记录 warning，继续后续步骤。不要让插图步骤阻塞发布。
+
 ### Step 3 · 生成 page.tsx
 
 Read `articles/<slug>/source/raw.md` 和 `articles/<slug>/meta.json`。然后**你亲自**写 `articles/<slug>/page.tsx`。
