@@ -1230,7 +1230,7 @@ git commit -m "chore: scaffold src/articles directory"
 
 > 注意：`inbox/` 在 .gitignore 里，不会被提交。测试材料只在本地存在。
 
-- [ ] **Step 10.1: 创建测试 inbox 材料**
+- [x] **Step 10.1: 创建测试 inbox 材料**
 
 ```bash
 mkdir -p inbox/hello-world/attachments
@@ -1262,7 +1262,7 @@ Plan C will upgrade:
 - Personal branch setup
 ```
 
-- [ ] **Step 10.2: 运行 /publish pipeline (手动)**
+- [x] **Step 10.2: 运行 /publish pipeline (手动)**
 
 因为 `/publish` 是 Claude Code skill，不能直接 bash。但我们可以**手动模拟** skill 的步骤：
 
@@ -1410,7 +1410,7 @@ bun run scripts/self-review.ts /src/articles/hello-weid-fun/
 
 Expected: `pass: true`，退出码 0。
 
-- [ ] **Step 10.3: 本地 preview 手动验证**
+- [x] **Step 10.3: 本地 preview 手动验证**
 
 ```bash
 bun run preview
@@ -1422,7 +1422,7 @@ bun run preview
 
 Ctrl+C 停掉。
 
-- [ ] **Step 10.4: 提交（注意：文章文件不属于 personal content 的 ignore 路径吗？）**
+- [x] **Step 10.4: 提交（注意：文章文件不属于 personal content 的 ignore 路径吗？）**
 
 回忆 Plan A 的 `.gitignore`：`/src/articles/` 是 ignore 的，`/articles/` 也是 ignore 的。所以 `hello-weid-fun` 是**本地文件**，不会进 main 分支的 commit。
 
