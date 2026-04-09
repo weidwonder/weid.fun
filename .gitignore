@@ -1,0 +1,77 @@
+# ============================================================
+# weid.fun · .gitignore (main / framework 分支)
+# ============================================================
+# 这个文件在 main 分支上排除所有个人内容，使得 main 可以作为
+# 纯粹的「框架代码」开源。
+#
+# personal 分支的 .gitignore 是这份的子集 —— 它不包含
+# 「个人内容」那一段，从而让博客文章、rules、references
+# 在 personal 分支被追踪。
+#
+# 合并方向：main → personal（框架更新流向博客）
+# 禁止：personal → main（防止个人内容污染框架）
+# ============================================================
+
+# -------- 构建产物 --------
+/dist/
+/build/
+*.log
+
+# -------- 依赖 --------
+/node_modules/
+/.pnp
+.pnp.js
+
+# -------- 运行时 --------
+/.cache/
+/.vite/
+/.tsbuildinfo
+*.tsbuildinfo
+
+# -------- 编辑器 / OS --------
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# -------- 环境变量 --------
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# -------- Brainstorming / Superpowers --------
+/.superpowers/
+
+# -------- oh-my-claudecode session state --------
+/.omc/
+
+# -------- 文件夹模式的暂存区（永远本地） --------
+/inbox/
+
+# ============================================================
+# 👇 以下是「个人内容」：仅在 main (framework) 分支 ignore
+# ============================================================
+# 在 personal 分支中，这一段会被删除或注释掉，让这些内容
+# 可以被 git 追踪。
+
+# 所有文章（原始材料 + 生成产物）
+/src/articles/
+# 也兼容把 articles 放在顶层的写法
+/articles/
+
+# 系列规范（由首篇生成，属于个人风格积累）
+/series/
+
+# 品味参考画廊
+/src/reference-vault/*
+!/src/reference-vault/.gitkeep
+!/src/reference-vault/README.md
+
+# 作者自定义的 hard rules（在 baseline 之外叠加的个人规则）
+/src/standards/hard-rules.custom.md
+
+# 首页动态数据（文章列表 / portal 配置）
+/src/home/home-data.json
