@@ -1128,7 +1128,7 @@ git commit -m "feat(publish): add extract-palette.ts using sharp"
 **Files:**
 - Create: `scripts/publish/update-home-data.ts`
 
-- [ ] **Step 8.1: 写 update-home-data.ts**
+- [x] **Step 8.1: 写 update-home-data.ts**
 
 ```ts
 #!/usr/bin/env bun
@@ -1187,7 +1187,7 @@ function main() {
 main()
 ```
 
-- [ ] **Step 8.2: 提交**
+- [x] **Step 8.2: 提交**
 
 ```bash
 git add scripts/publish/update-home-data.ts
@@ -1203,14 +1203,14 @@ git commit -m "feat(publish): add update-home-data.ts"
 **Files:**
 - Create: `src/articles/.gitkeep`
 
-- [ ] **Step 9.1: 创建目录**
+- [x] **Step 9.1: 创建目录**
 
 ```bash
 mkdir -p src/articles
 touch src/articles/.gitkeep
 ```
 
-- [ ] **Step 9.2: 提交**
+- [x] **Step 9.2: 提交**
 
 ```bash
 git add src/articles/.gitkeep
