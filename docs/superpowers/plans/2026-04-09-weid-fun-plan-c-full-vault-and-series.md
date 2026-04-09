@@ -641,7 +641,7 @@ git commit -m "feat(vault): add reference vault directory and README"
 - Create: `src/standards/hard-rules.custom.md.example`
 - Create: `scripts/publish/hard-rules-merge.ts`
 
-- [ ] **Step 5.1: 写 example 文件**
+- [x] **Step 5.1: 写 example 文件**
 
 ```markdown
 # Hard Rules · Custom (Personal)
@@ -675,7 +675,7 @@ git commit -m "feat(vault): add reference vault directory and README"
 - 规则应该是**绝对**的（不允许「通常」「尽量」这种模糊词）
 ```
 
-- [ ] **Step 5.2: 写 hard-rules-merge.ts**
+- [x] **Step 5.2: 写 hard-rules-merge.ts**
 
 ```ts
 #!/usr/bin/env bun
@@ -722,7 +722,7 @@ function main() {
 main()
 ```
 
-- [ ] **Step 5.3: 本地测试**
+- [x] **Step 5.3: 本地测试**
 
 ```bash
 bun run scripts/publish/hard-rules-merge.ts
@@ -730,7 +730,7 @@ bun run scripts/publish/hard-rules-merge.ts
 
 Expected: 打印 baseline 内容 + `*(no custom rules)*`（因为 custom.md 不存在，只有 .example）。
 
-- [ ] **Step 5.4: 提交**
+- [x] **Step 5.4: 提交**
 
 ```bash
 git add src/standards/hard-rules.custom.md.example scripts/publish/hard-rules-merge.ts
