@@ -46,7 +46,7 @@ export function Vitrine({ articles }: VitrineProps) {
           {sorted.map((article) => (
             <a
               key={article.slug}
-              href={`/articles/${article.slug}/`}
+              href={`/src/articles/${article.slug}/`}
               data-testid={`vitrine-card-${article.slug}`}
               className="group relative block aspect-[4/5] overflow-hidden rounded-lg transition-transform hover:scale-[1.02]"
               style={{

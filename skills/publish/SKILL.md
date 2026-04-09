@@ -56,9 +56,11 @@ Read `articles/<slug>/source/raw.md` 和 `articles/<slug>/meta.json`。然后**�
 ```tsx
 import { WebGLHero } from '@/primitives/WebGLHero'
 import { CornerMarker } from '@/primitives/CornerMarker'
+import type { ArticleMeta } from '@/lib/types'
 import ReactMarkdown from 'react-markdown'
 import meta from './meta.json'
 
+const articleMeta = meta as ArticleMeta
 const articleContent = `<这里粘贴 raw.md 的完整内容>`
 
 export function ArticlePage() {
@@ -66,10 +68,10 @@ export function ArticlePage() {
     <div className="min-h-screen bg-black text-white">
       <CornerMarker />
       <WebGLHero
-        title={meta.title}
-        subtitle={meta.series || undefined}
-        primaryColor={meta.colors.primary}
-        bgColor={meta.colors.bg}
+        title={articleMeta.title}
+        subtitle={articleMeta.series || undefined}
+        primaryColor={articleMeta.colors.primary}
+        bgColor={articleMeta.colors.bg}
       />
       <article className="prose prose-invert prose-lg mx-auto max-w-3xl px-6 py-20">
         <ReactMarkdown>{articleContent}</ReactMarkdown>
