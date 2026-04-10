@@ -26,7 +26,6 @@ interface BreakpointResult {
 
 interface ReviewResult {
   pass: boolean
-  score: number
   issues: string[]
   breakpoints: Record<string, BreakpointResult>
 }
@@ -99,7 +98,6 @@ async function main() {
 
   const result: ReviewResult = {
     pass: true,
-    score: 100,
     issues: [],
     breakpoints: {
       desktop: { passed: false, issues: [] },
@@ -117,7 +115,6 @@ async function main() {
         result.issues.push(...bpResult.issues)
       }
     }
-    result.score = result.pass ? 100 : Math.max(0, 100 - result.issues.length * 15)
   } finally {
     await browser.close()
     await previewServer.stop()

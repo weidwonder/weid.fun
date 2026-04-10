@@ -34,6 +34,16 @@ function slugify(text: string): string {
   return slugifySegment(text)
 }
 
+export function buildExcerpt(rawMd: string): string {
+  return rawMd
+    .replace(/^---[\s\S]*?---\n*/m, '')
+    .replace(/```[\s\S]*?```/g, ' ')
+    .replace(/^#.*$/gm, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, 160)
+}
+
 function extractTitle(rawMd: string): string {
   const h1 = rawMd.match(/^#\s+(.+)$/m)
   if (h1) return h1[1].trim()
@@ -97,7 +107,7 @@ async function main() {
       primary: '#8338ec',
       bg: '#000000',
     },
-    excerpt: rawMd.replace(/^#.*$/gm, '').replace(/\s+/g, ' ').trim().slice(0, 160),
+    excerpt: buildExcerpt(rawMd),
   }
 
   fs.writeFileSync(path.join(articleDir, 'meta.json'), `${JSON.stringify(meta, null, 2)}\n`)
@@ -106,7 +116,9 @@ async function main() {
   console.log(`SLUG=${slug}`)
 }
 
-main().catch((err) => {
-  console.error('[organize-source] fatal:', err)
-  process.exit(1)
-})
+if (import.meta.main) {
+  main().catch((err) => {
+    console.error('[organize-source] fatal:', err)
+    process.exit(1)
+  })
+}

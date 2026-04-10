@@ -13,7 +13,6 @@ You must output valid JSON only, shaped like:
 ```json
 {
   "pass": true,
-  "score": 0,
   "hardRuleViolations": [
     {
       "rule": "R1",
@@ -30,11 +29,6 @@ Evaluation priorities:
 - Responsive quality matters at all three breakpoints, especially mobile.
 - Avoid generic AI-looking layout decisions, boilerplate SaaS patterns, and weak hierarchy.
 - If reference images are provided, judge whether the article feels like it belongs in the same visual family.
-
-Scoring guidance:
-- 90-100: ready to ship
-- 70-89: promising but needs revision
-- 0-69: not acceptable yet
 
 When suggesting revisions:
 - Be concrete

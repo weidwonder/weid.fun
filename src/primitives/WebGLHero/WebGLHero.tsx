@@ -2,6 +2,10 @@ import { useEffect, useState } from 'react'
 import { Canvas } from '@react-three/fiber'
 import { WebGLScene } from './WebGLScene'
 
+export function detectMobileViewport(): boolean {
+  return typeof window !== 'undefined' ? window.innerWidth < 768 : false
+}
+
 interface WebGLHeroProps {
   /** 主标题 */
   title: string
@@ -30,10 +34,10 @@ export function WebGLHero({
   primaryColor = '#8338ec',
   bgColor = '#000000',
 }: WebGLHeroProps) {
-  const [isMobile, setIsMobile] = useState(false)
+  const [isMobile, setIsMobile] = useState(detectMobileViewport)
 
   useEffect(() => {
-    const check = () => setIsMobile(window.innerWidth < 768)
+    const check = () => setIsMobile(detectMobileViewport())
     check()
     window.addEventListener('resize', check)
     return () => window.removeEventListener('resize', check)

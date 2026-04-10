@@ -7,15 +7,30 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { resolveArticlePath, resolveSeriesDir, sanitizeSlug } from '../lib/project.ts'
 
+export function extractPrimitivesFromContent(content: string): string[] {
+  const primitives = new Set<string>()
+
+  const directImportRe = /from\s+['"]@\/primitives\/([^'"]+)['"]/g
+  let directMatch: RegExpExecArray | null
+  while ((directMatch = directImportRe.exec(content)) !== null) {
+    primitives.add(directMatch[1])
+  }
+
+  const barrelImportRe = /import\s+\{([^}]+)\}\s+from\s+['"]@\/primitives['"]/g
+  let barrelMatch: RegExpExecArray | null
+  while ((barrelMatch = barrelImportRe.exec(content)) !== null) {
+    for (const name of barrelMatch[1].split(',')) {
+      const cleaned = name.trim().replace(/\s+as\s+\w+$/, '')
+      if (cleaned) primitives.add(cleaned)
+    }
+  }
+
+  return [...primitives].sort()
+}
+
 function extractPrimitives(pageTsxPath: string): string[] {
   const content = fs.readFileSync(pageTsxPath, 'utf-8')
-  const primitives: string[] = []
-  const importRe = /from\s+['"]@\/primitives\/([^'"]+)['"]/g
-  let match: RegExpExecArray | null
-  while ((match = importRe.exec(content)) !== null) {
-    primitives.push(match[1])
-  }
-  return primitives
+  return extractPrimitivesFromContent(content)
 }
 
 function main() {
@@ -53,4 +68,6 @@ function main() {
   console.error(`✓ series spec written: ${seriesDir}/spec.json`)
 }
 
-main()
+if (import.meta.main) {
+  main()
+}

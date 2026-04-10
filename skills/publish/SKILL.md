@@ -224,7 +224,6 @@ bun run scripts/publish/vision-review.ts <slug>
 ```json
 {
   "pass": true,
-  "score": 0,
   "hardRuleViolations": [
     {
       "rule": "R1",
@@ -259,7 +258,7 @@ bun run scripts/publish/vision-review.ts <slug>
 
 Article: src/articles/<slug>/
 Preview: bun run preview → http://localhost:4173/src/articles/<slug>/
-Deploy: ./scripts/deploy.sh
+Deploy: WEID_DEPLOY_SERVER=<host> ./scripts/deploy.sh --yes
 ```
 
 ### Step 9 · 若系列首篇，写 spec
