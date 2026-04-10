@@ -8,7 +8,7 @@
 
 这意味着项目**刻意不使用**任何现成的博客框架（Hugo、Jekyll、Astro、Next.js starter 等）。它们追求一致性，而本项目追求的正相反。每篇文章都是独立的页面，可以自由选择自己的技术栈、结构和审美。
 
-English: see [README.md](./README.md).
+英文版本见 [README.md](./README.md)。
 
 ---
 
