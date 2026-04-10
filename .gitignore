@@ -31,6 +31,7 @@
 # -------- 测试产物 --------
 /test-results/
 /playwright-report/
+/.tmp/
 
 # -------- 编辑器 / OS --------
 .DS_Store
