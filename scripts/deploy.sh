@@ -14,8 +14,8 @@ if [[ "${1:-}" == "--dry-run" ]]; then
   DRY_RUN="echo [DRY]"
 fi
 
-SERVER="root@REDACTED_IP"
-REMOTE_PATH="/var/www/weid.fun/"
+SERVER="${WEID_DEPLOY_SERVER:-root@10.14.0.1}"
+REMOTE_PATH="${WEID_REMOTE_PATH:-/var/www/weid.fun/}"
 LOCAL_DIST="dist/"
 
 echo "==> Building..."
