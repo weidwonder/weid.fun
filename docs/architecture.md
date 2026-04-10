@@ -3,7 +3,7 @@
 > **最后更新**: 2026-04-09
 > **状态**: Active · Living Document
 
-本文档记录 weid.fun 项目的**架构决策**及**理由**。需求见 `docs/requirements.md`，完整设计见 `docs/superpowers/specs/2026-04-09-weid-fun-blog-design.md`。
+本文档记录 weid.fun 项目的**架构决策**及**理由**。需求见 `docs/requirements.md`。
 
 ---
 
@@ -282,7 +282,7 @@ weid.fun/
 浏览器: https://weid.fun
 ```
 
-详见 `docs/deployment/2026-04-09-ssl证书部署.md`。
+nginx 配置模板见 `scripts/nginx/weid.fun.conf`。
 
 ## 6. 演化路径
 

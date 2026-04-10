@@ -3,7 +3,7 @@
 > **最后更新**: 2026-04-09
 > **状态**: Active
 
-本文档说明「这个项目在做什么」。技术细节见 `docs/architecture.md`，完整设计见 `docs/superpowers/specs/2026-04-09-weid-fun-blog-design.md`。
+本文档说明「这个项目在做什么」。技术细节见 `docs/architecture.md`。
 
 ---
 
