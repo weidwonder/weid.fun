@@ -14,8 +14,10 @@
 
 import fs from 'node:fs'
 import path from 'node:path'
-import { execSync, spawn, type ChildProcess } from 'node:child_process'
 import { chromium } from 'playwright'
+import { PREVIEW_BASE_URL, startPreviewServer } from '../lib/preview-server.ts'
+import { resolveProjectPath, sanitizeSlug } from '../lib/project.ts'
+import { mergeHardRules } from './hard-rules-merge.ts'
 
 const BREAKPOINTS = [
   { name: 'desktop', width: 1920, height: 1080 },
@@ -39,9 +41,12 @@ interface ReviewReference {
 interface ReviewBundle {
   slug: string | null
   pagePath: string
+  sessionDir: string
   reviewDir: string
   hardRulesPath: string
   reviewPromptPath: string
+  agentVerdictPath: string
+  iterationPath: string
   screenshots: ReviewScreenshot[]
   references: ReviewReference[]
 }
@@ -83,7 +88,7 @@ function parseArgs(argv: string[]): { slug: string | null; pagePath: string; lab
 
   if (argv[0].startsWith('--')) usage()
 
-  const slug = argv[0]
+  const slug = sanitizeSlug(argv[0])
   return {
     slug,
     pagePath: `/src/articles/${slug}/`,
@@ -91,46 +96,24 @@ function parseArgs(argv: string[]): { slug: string | null; pagePath: string; lab
   }
 }
 
-async function startPreview(): Promise<ChildProcess> {
-  const proc = spawn('bun', ['run', 'preview'], {
-    stdio: ['ignore', 'pipe', 'pipe'],
-    detached: false,
-  })
-
-  await new Promise<void>((resolve, reject) => {
-    const timeout = setTimeout(() => reject(new Error('preview timeout')), 30_000)
-
-    proc.stdout?.on('data', (data) => {
-      if (data.toString().includes('Local:')) {
-        clearTimeout(timeout)
-        setTimeout(resolve, 500)
-      }
-    })
-
-    proc.stderr?.on('data', (data) => {
-      if (data.toString().includes('error')) {
-        clearTimeout(timeout)
-        reject(new Error(data.toString()))
-      }
-    })
-
-    proc.on('error', reject)
-    proc.on('exit', (code) => {
-      if (code && code !== 0) {
-        clearTimeout(timeout)
-        reject(new Error(`preview exited with code ${code}`))
-      }
-    })
-  })
-
-  return proc
-}
-
-function ensureReviewDir(label: string): string {
+function ensureReviewWorkspace(label: string): {
+  sessionDir: string
+  reviewDir: string
+  agentVerdictPath: string
+  iterationPath: string
+} {
   const timestamp = new Date().toISOString().replace(/[:.]/g, '-')
-  const reviewDir = path.resolve('.tmp', 'vision-review', `${label}-${timestamp}`)
+  const sessionDir = resolveProjectPath('.tmp', 'vision-review', label)
+  const reviewDir = path.join(sessionDir, timestamp)
   fs.mkdirSync(reviewDir, { recursive: true })
-  return reviewDir
+  const agentVerdictPath = path.join(sessionDir, 'agent-verdict.json')
+  const iterationPath = path.join(sessionDir, 'iteration.txt')
+
+  if (!fs.existsSync(iterationPath)) {
+    fs.writeFileSync(iterationPath, '0\n')
+  }
+
+  return { sessionDir, reviewDir, agentVerdictPath, iterationPath }
 }
 
 async function captureScreenshots(pagePath: string, reviewDir: string): Promise<ReviewScreenshot[]> {
@@ -143,7 +126,7 @@ async function captureScreenshots(pagePath: string, reviewDir: string): Promise<
       const page = await ctx.newPage()
       const outputPath = path.join(reviewDir, `${bp.name}.png`)
 
-      await page.goto(`http://localhost:4173${pagePath}`, {
+      await page.goto(`${PREVIEW_BASE_URL}${pagePath}`, {
         waitUntil: 'networkidle',
         timeout: 15_000,
       })
@@ -166,7 +149,7 @@ async function captureScreenshots(pagePath: string, reviewDir: string): Promise<
 }
 
 function loadReferenceVault(): ReviewReference[] {
-  const vault = path.resolve('src', 'reference-vault')
+  const vault = resolveProjectPath('src', 'reference-vault')
   if (!fs.existsSync(vault)) return []
 
   const references: ReviewReference[] = []
@@ -188,8 +171,8 @@ function writeReviewInputs(reviewDir: string): { hardRulesPath: string; reviewPr
   const hardRulesPath = path.join(reviewDir, 'hard-rules.merged.md')
   const reviewPromptPath = path.join(reviewDir, 'review-prompt.md')
 
-  const hardRules = execSync('bun run scripts/publish/hard-rules-merge.ts').toString()
-  const reviewPrompt = fs.readFileSync('src/standards/review-prompt.md', 'utf-8')
+  const hardRules = mergeHardRules()
+  const reviewPrompt = fs.readFileSync(resolveProjectPath('src', 'standards', 'review-prompt.md'), 'utf-8')
 
   fs.writeFileSync(hardRulesPath, hardRules)
   fs.writeFileSync(reviewPromptPath, reviewPrompt)
@@ -199,25 +182,28 @@ function writeReviewInputs(reviewDir: string): { hardRulesPath: string; reviewPr
 
 async function main() {
   const { slug, pagePath, label } = parseArgs(process.argv.slice(2))
-  const reviewDir = ensureReviewDir(label)
+  const { sessionDir, reviewDir, agentVerdictPath, iterationPath } = ensureReviewWorkspace(label)
   const { hardRulesPath, reviewPromptPath } = writeReviewInputs(reviewDir)
-  const preview = await startPreview()
+  const preview = await startPreviewServer()
 
   try {
     const screenshots = await captureScreenshots(pagePath, reviewDir)
     const bundle: ReviewBundle = {
       slug,
       pagePath,
+      sessionDir,
       reviewDir,
       hardRulesPath,
       reviewPromptPath,
+      agentVerdictPath,
+      iterationPath,
       screenshots,
       references: loadReferenceVault(),
     }
 
     console.log(JSON.stringify(bundle, null, 2))
   } finally {
-    preview.kill('SIGINT')
+    await preview.stop()
   }
 }
 

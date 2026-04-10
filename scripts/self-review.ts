@@ -10,8 +10,8 @@
  *   /src/articles/hello-world/
  */
 
-import { spawn, type ChildProcess } from 'node:child_process'
 import { chromium, type Browser } from 'playwright'
+import { PREVIEW_BASE_URL, startPreviewServer } from './lib/preview-server.ts'
 
 const BREAKPOINTS = [
   { name: 'desktop', width: 1920, height: 1080 },
@@ -31,40 +31,9 @@ interface ReviewResult {
   breakpoints: Record<string, BreakpointResult>
 }
 
-async function startPreview(): Promise<ChildProcess> {
-  console.error('[self-review] starting preview server...')
-  const proc = spawn('bun', ['run', 'preview'], {
-    stdio: ['ignore', 'pipe', 'pipe'],
-    detached: false,
-  })
-
-  await new Promise<void>((resolve, reject) => {
-    const timeout = setTimeout(() => reject(new Error('preview timeout')), 30_000)
-
-    proc.stdout?.on('data', (data) => {
-      if (data.toString().includes('Local:')) {
-        clearTimeout(timeout)
-        setTimeout(resolve, 500)
-      }
-    })
-
-    proc.stderr?.on('data', (data) => {
-      if (data.toString().includes('error')) {
-        clearTimeout(timeout)
-        reject(new Error(data.toString()))
-      }
-    })
-
-    proc.on('error', reject)
-    proc.on('exit', (code) => {
-      if (code && code !== 0) {
-        clearTimeout(timeout)
-        reject(new Error(`preview exited with code ${code}`))
-      }
-    })
-  })
-
-  return proc
+function normalizePagePath(pagePath: string): string {
+  const withLeadingSlash = pagePath.startsWith('/') ? pagePath : `/${pagePath}`
+  return withLeadingSlash.endsWith('/') ? withLeadingSlash : `${withLeadingSlash}/`
 }
 
 async function reviewBreakpoint(
@@ -86,7 +55,7 @@ async function reviewBreakpoint(
   page.on('pageerror', (err) => consoleErrors.push(err.message))
 
   try {
-    await page.goto(`http://localhost:4173${pagePath}`, {
+    await page.goto(`${PREVIEW_BASE_URL}${pagePath}`, {
       waitUntil: 'networkidle',
       timeout: 15_000,
     })
@@ -121,10 +90,11 @@ async function reviewBreakpoint(
 }
 
 async function main() {
-  const pagePath = process.argv[2] || '/'
+  const pagePath = normalizePagePath(process.argv[2] || '/')
   console.error(`[self-review] reviewing ${pagePath}`)
 
-  const previewProc = await startPreview()
+  console.error('[self-review] starting preview server...')
+  const previewServer = await startPreviewServer()
   const browser = await chromium.launch({ headless: true })
 
   const result: ReviewResult = {
@@ -150,7 +120,7 @@ async function main() {
     result.score = result.pass ? 100 : Math.max(0, 100 - result.issues.length * 15)
   } finally {
     await browser.close()
-    previewProc.kill('SIGINT')
+    await previewServer.stop()
   }
 
   console.log(JSON.stringify(result, null, 2))

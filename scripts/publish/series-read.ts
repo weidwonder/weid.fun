@@ -4,16 +4,17 @@
  */
 
 import fs from 'node:fs'
-import path from 'node:path'
+import { resolveSeriesPath, sanitizeSlug } from '../lib/project.ts'
 
 function main() {
-  const name = process.argv[2]
-  if (!name) {
+  const rawName = process.argv[2]
+  if (!rawName) {
     console.error('Usage: series-read.ts <series-name>')
     process.exit(1)
   }
 
-  const specPath = path.join('series', name, 'spec.json')
+  const name = sanitizeSlug(rawName, 'series name')
+  const specPath = resolveSeriesPath(name, 'spec.json')
   if (!fs.existsSync(specPath)) {
     console.log('FIRST')
     return

@@ -10,7 +10,7 @@ export function PlaygroundPage() {
         src="data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA="
         label="silent test"
       />
-      <p className="max-w-md text-center font-mono text-xs text-neutral-600">
+      <p className="max-w-md text-center font-mono text-fluid-xs text-neutral-600">
         真实使用时 src 应指向 audio 文件。playground 里用的是 1 字节 silent wav 便于测试。
       </p>
     </div>

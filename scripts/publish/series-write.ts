@@ -5,6 +5,7 @@
 
 import fs from 'node:fs'
 import path from 'node:path'
+import { resolveArticlePath, resolveSeriesDir, sanitizeSlug } from '../lib/project.ts'
 
 function extractPrimitives(pageTsxPath: string): string[] {
   const content = fs.readFileSync(pageTsxPath, 'utf-8')
@@ -18,14 +19,16 @@ function extractPrimitives(pageTsxPath: string): string[] {
 }
 
 function main() {
-  const [seriesName, slug] = process.argv.slice(2)
-  if (!seriesName || !slug) {
+  const [rawSeriesName, rawSlug] = process.argv.slice(2)
+  if (!rawSeriesName || !rawSlug) {
     console.error('Usage: series-write.ts <series-name> <slug>')
     process.exit(1)
   }
 
-  const metaPath = path.join('src', 'articles', slug, 'meta.json')
-  const pageTsxPath = path.join('src', 'articles', slug, 'page.tsx')
+  const seriesName = sanitizeSlug(rawSeriesName, 'series name')
+  const slug = sanitizeSlug(rawSlug)
+  const metaPath = resolveArticlePath(slug, 'meta.json')
+  const pageTsxPath = resolveArticlePath(slug, 'page.tsx')
   if (!fs.existsSync(metaPath) || !fs.existsSync(pageTsxPath)) {
     console.error(`Error: article ${slug} not found or incomplete`)
     process.exit(1)
@@ -43,7 +46,7 @@ function main() {
     note: 'Generated from the first article. Subsequent articles in this series should honor these constraints.',
   }
 
-  const seriesDir = path.join('series', seriesName)
+  const seriesDir = resolveSeriesDir(seriesName)
   fs.mkdirSync(seriesDir, { recursive: true })
   fs.writeFileSync(path.join(seriesDir, 'spec.json'), `${JSON.stringify(spec, null, 2)}\n`)
 

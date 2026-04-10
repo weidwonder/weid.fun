@@ -12,7 +12,7 @@ export interface ArticleColors {
 }
 
 export interface ArticleMeta {
-  /** URL slug，对应 articles/<slug>/ 目录名 */
+  /** URL slug，对应 src/articles/<slug>/ 目录名 */
   slug: string
   /** 文章标题 */
   title: string

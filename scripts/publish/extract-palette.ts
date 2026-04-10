@@ -6,6 +6,7 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import sharp from 'sharp'
+import { resolveArticlePath, sanitizeSlug } from '../lib/project.ts'
 
 function rgbToHex(r: number, g: number, b: number): string {
   const hex = (n: number) => n.toString(16).padStart(2, '0')
@@ -56,14 +57,15 @@ async function extractDominantColor(imgPath: string): Promise<string> {
 }
 
 async function main() {
-  const slug = process.argv[2]
-  if (!slug) {
+  const rawSlug = process.argv[2]
+  if (!rawSlug) {
     console.error('Usage: extract-palette.ts <slug>')
     process.exit(1)
   }
 
-  const articleDir = path.join('src', 'articles', slug)
-  const metaPath = path.join(articleDir, 'meta.json')
+  const slug = sanitizeSlug(rawSlug)
+  const articleDir = resolveArticlePath(slug)
+  const metaPath = resolveArticlePath(slug, 'meta.json')
   if (!fs.existsSync(metaPath)) {
     console.error(`Error: ${metaPath} not found`)
     process.exit(1)

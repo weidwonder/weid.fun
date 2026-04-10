@@ -5,6 +5,7 @@
 
 import fs from 'node:fs'
 import path from 'node:path'
+import { resolveArticleDir, resolveCliPath, sanitizeSlug, slugifySegment } from '../lib/project.ts'
 
 interface Args {
   inboxPath: string
@@ -30,15 +31,7 @@ function parseArgs(argv: string[]): Args {
 }
 
 function slugify(text: string): string {
-  return (
-    text
-      .toLowerCase()
-      .trim()
-      .replace(/[^\w\s-]/g, ' ')
-      .replace(/[\s_-]+/g, '-')
-      .replace(/^-+|-+$/g, '')
-      .slice(0, 60) || 'untitled'
-  )
+  return slugifySegment(text)
 }
 
 function extractTitle(rawMd: string): string {
@@ -68,13 +61,14 @@ function copyRecursive(src: string, dest: string) {
 
 async function main() {
   const args = parseArgs(process.argv.slice(2))
+  const inboxPath = resolveCliPath(args.inboxPath)
 
-  if (!fs.existsSync(args.inboxPath)) {
-    console.error(`Error: ${args.inboxPath} does not exist`)
+  if (!fs.existsSync(inboxPath)) {
+    console.error(`Error: ${inboxPath} does not exist`)
     process.exit(1)
   }
 
-  const rawMdPath = path.join(args.inboxPath, 'raw.md')
+  const rawMdPath = path.join(inboxPath, 'raw.md')
   if (!fs.existsSync(rawMdPath)) {
     console.error(`Error: ${rawMdPath} does not exist. inbox/<name>/ must contain raw.md`)
     process.exit(1)
@@ -82,16 +76,16 @@ async function main() {
 
   const rawMd = fs.readFileSync(rawMdPath, 'utf-8')
   const title = extractTitle(rawMd)
-  const slug = args.slug || slugify(title)
+  const slug = sanitizeSlug(args.slug ? args.slug : slugify(title))
 
-  const articleDir = path.join('src', 'articles', slug)
+  const articleDir = resolveArticleDir(slug)
   if (fs.existsSync(articleDir)) {
     console.error(`Error: ${articleDir} already exists. Delete it first to regenerate.`)
     process.exit(1)
   }
 
   const sourceDir = path.join(articleDir, 'source')
-  copyRecursive(args.inboxPath, sourceDir)
+  copyRecursive(inboxPath, sourceDir)
 
   const meta = {
     slug,

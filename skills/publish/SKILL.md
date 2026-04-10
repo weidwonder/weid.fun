@@ -1,6 +1,6 @@
 ---
 name: publish
-description: Publish an article to weid.fun. Takes raw materials (markdown + optional directives + optional attachments), organizes them into articles/<slug>/source/, generates a Tier 4 page, updates the home page, and runs a self-review loop. Use when user says "publish this article" or invokes /publish.
+description: Publish an article to weid.fun. Takes raw materials (markdown + optional directives + optional attachments), organizes them into src/articles/<slug>/source/, generates a Tier 4 page, updates the home page, and runs a self-review loop. Use when user says "publish this article" or invokes /publish.
 ---
 
 # /publish · Publish an article to weid.fun
@@ -50,8 +50,8 @@ bun run scripts/publish/organize-source.ts <inbox-path> [--slug <custom>] [--ser
 ```
 
 这个脚本会：
-- 在 `articles/<slug>/source/` 下复制 `inbox/<name>/*`
-- 生成 `articles/<slug>/meta.json` 初版（title / slug / series / pin / publishedAt）
+- 在 `src/articles/<slug>/source/` 下复制 `inbox/<name>/*`
+- 生成 `src/articles/<slug>/meta.json` 初版（title / slug / series / pin / publishedAt）
 
 **从脚本 stdout 读取 slug**，脚本会打印 `SLUG=<value>`。
 
@@ -61,7 +61,7 @@ bun run scripts/publish/organize-source.ts <inbox-path> [--slug <custom>] [--ser
 bun run scripts/publish/extract-palette.ts <slug>
 ```
 
-这个脚本会从 `articles/<slug>/source/attachments/` 的第一张图提取主色，写回 `meta.json.colors`。如果没有图片，使用默认色（`#8338ec`）。
+这个脚本会从 `src/articles/<slug>/source/attachments/` 的第一张图提取主色，写回 `meta.json.colors`。如果没有图片，使用默认色（`#8338ec`）。
 
 ### Step 2.5 · 读系列 spec
 
@@ -82,11 +82,11 @@ bun run scripts/publish/series-read.ts <series-name>
 
 否则，**主动调用 `baoyu-article-illustrator` skill**：
 
-1. 读取 `articles/<slug>/source/raw.md` 作为文章内容
-2. 读取 `articles/<slug>/meta.json` 的 `colors.primary` 作为配色参考
+1. 读取 `src/articles/<slug>/source/raw.md` 作为文章内容
+2. 读取 `src/articles/<slug>/meta.json` 的 `colors.primary` 作为配色参考
 3. 调用 `baoyu-article-illustrator` skill，传入 markdown 和期望的 illustration positions
 4. 让它产出 N 张图片
-5. 把产出的图片保存到 `articles/<slug>/assets/`
+5. 把产出的图片保存到 `src/articles/<slug>/assets/`
 6. 记录每张图对应 markdown 的哪段（用于 Step 3 的 `page.tsx` 生成）
 
 **重要**：`baoyu-article-illustrator` 是独立 skill，它的调用方式见该 skill 的 `SKILL.md`。
@@ -96,7 +96,7 @@ bun run scripts/publish/series-read.ts <series-name>
 
 ### Step 3 · 生成 page.tsx
 
-Read `articles/<slug>/source/raw.md` 和 `articles/<slug>/meta.json`。然后**你亲自**写 `articles/<slug>/page.tsx`。
+Read `src/articles/<slug>/source/raw.md` 和 `src/articles/<slug>/meta.json`。然后**你亲自**写 `src/articles/<slug>/page.tsx`。
 
 **必须遵守的模板**（MVP，每篇文章结构相同）：
 
@@ -132,10 +132,11 @@ export function ArticlePage() {
 - 把 `raw.md` 的全部内容**字符串化**（处理反引号、换行），填入 `articleContent`
 - 不要修改 `meta.json` 的内容
 - 只使用 `CornerMarker` 和 `WebGLHero` 两个 primitive（Plan C 会扩展）
+- 如果 Step 2.7 生成了 `assets/`，必须在 `page.tsx` 里实际消费这些素材；不要只生成不使用
 
 ### Step 4 · 写 index.html 和 main.tsx
 
-**`articles/<slug>/index.html`**:
+**`src/articles/<slug>/index.html`**:
 ```html
 <!doctype html>
 <html lang="en">
@@ -153,7 +154,7 @@ export function ArticlePage() {
 
 把 `<meta.title>` 替换为实际标题。
 
-**`articles/<slug>/main.tsx`**:
+**`src/articles/<slug>/main.tsx`**:
 ```tsx
 import React from 'react'
 import ReactDOM from 'react-dom/client'
@@ -204,17 +205,21 @@ bun run scripts/publish/vision-review.ts <slug>
 ```
 
 这个脚本只会准备评审材料并输出 JSON，包含：
+- `sessionDir`：当前文章这轮自审的稳定工作目录
 - 三个断点截图的绝对路径
 - 合并后的 hard rules 文件路径
 - review prompt 文件路径
 - reference vault 图片和说明文件路径
+- `agentVerdictPath`：你必须把自己的视觉评审 JSON 写到这里
+- `iterationPath`：共享迭代计数器，机械检查和视觉评审都用它
 
 然后你必须亲自完成视觉评审：
 1. 读取这个 JSON
 2. 读取 `hardRulesPath` 和 `reviewPromptPath`
 3. 用 `view_image` 查看每张 screenshot
 4. 若 `references` 非空：对每张 reference image 也用 `view_image` 查看；若有 `notesPath`，再读取说明
-5. 根据这些材料，产出一个**内部使用**的评审 JSON，格式必须是：
+5. 读取 `iterationPath`，若文件不存在则视为 `0`；进入阶段 2 前把计数 `+1` 并写回
+6. 根据这些材料，产出一个**内部使用**的评审 JSON，格式必须是：
 
 ```json
 {
@@ -237,6 +242,8 @@ bun run scripts/publish/vision-review.ts <slug>
 - 如果页面明显有“AI 套模板感”，直接记为 issue
 - 如果 reference vault 存在，判断新页面是否属于同一视觉家族
 
+7. 把这个 JSON 写到 `agentVerdictPath`
+
 读取你自己的评审 JSON：
 - 若 `pass=true`：进入 Step 8
 - 若 `pass=false` 且已迭代 <3 次：读 `suggestions`，修改 `page.tsx`，回到 Step 6
@@ -250,7 +257,7 @@ bun run scripts/publish/vision-review.ts <slug>
 ```text
 ✅ /publish complete.
 
-Article: articles/<slug>/
+Article: src/articles/<slug>/
 Preview: bun run preview → http://localhost:4173/src/articles/<slug>/
 Deploy: ./scripts/deploy.sh
 ```
@@ -269,6 +276,6 @@ bun run scripts/publish/series-write.ts <series-name> <slug>
 
 - **不要**在管线中询问用户任何问题
 - **不要**跳过任何 step
-- **不要**修改 `articles/<slug>/source/` 下的任何文件（source 是不可变的）
+- **不要**修改 `src/articles/<slug>/source/` 下的任何文件（source 是不可变的）
 - **不要**自动触发 deploy
 - **不要**commit（让用户自己决定是否 commit）

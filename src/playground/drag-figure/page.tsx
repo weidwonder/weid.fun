@@ -7,7 +7,7 @@ export function PlaygroundPage() {
       <CornerMarker />
       <div className="flex min-h-screen items-center justify-center">
         <DragFigure testId="drag-figure" initialX={0} initialY={0}>
-          <div className="flex h-32 w-32 items-center justify-center rounded-full bg-gradient-to-br from-pink-500 to-purple-600 font-mono text-xs uppercase tracking-wider shadow-2xl">
+          <div className="flex h-32 w-32 items-center justify-center rounded-full bg-gradient-to-br from-pink-500 to-purple-600 font-mono text-fluid-xs uppercase tracking-wider shadow-2xl">
             drag me
           </div>
         </DragFigure>
