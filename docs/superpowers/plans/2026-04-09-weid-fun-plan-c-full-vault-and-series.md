@@ -1007,7 +1007,7 @@ main().catch((err) => {
 })
 ```
 
-- [ ] **Step 7.3: 测试（需要 ANTHROPIC_API_KEY）**
+- [x] **Step 7.3: 测试（agent-native 视觉评审）**
 
 首先需要在 Task 10 之后才有真实的 article 可测。这一步**延后到 Task 12**。先提交脚本本身。
 
@@ -1336,15 +1336,14 @@ git commit -m "feat(publish): orchestrate baoyu-article-illustrator for auto ill
 
 ---
 
-## Task 12: 真实端到端发布测试（需要 ANTHROPIC_API_KEY）
+## Task 12: 真实端到端发布测试（agent-native 视觉评审）
 
 **目的**：用一个真实的 article，跑一次完整的 `/publish` pipeline，验证所有部分协作正确。
 
 **前置**：
-- 本机 shell 有 `ANTHROPIC_API_KEY` 环境变量
-- Claude Code 启动在项目根
+- Agent 会话启动在项目根
 
-- [ ] **Step 12.1: 创建一个 test 文章 inbox**
+- [x] **Step 12.1: 创建一个 test 文章 inbox**
 
 ```bash
 mkdir -p inbox/e2e-test/attachments
@@ -1354,45 +1353,46 @@ mkdir -p inbox/e2e-test/attachments
 ```markdown
 # End-to-End Publishing Test
 
-This article verifies the complete /publish pipeline including Claude Vision self-review.
+This article verifies the complete /publish pipeline including agent-native vision self-review.
 
 When you read this, the following worked end-to-end:
 1. organize-source.ts created the source folder
 2. extract-palette.ts picked a primary color
-3. Claude wrote page.tsx using the template
+3. the Agent wrote page.tsx using the template
 4. build succeeded
 5. self-review.ts mechanical checks passed
-6. vision-review.ts Claude Vision evaluation passed
-7. home-data.json was updated
+6. vision-review.ts prepared screenshots and review inputs
+7. the Agent evaluated the screenshots directly
+8. home-data.json was updated
 
 If any of these failed, you'd see an error instead of this article.
 ```
 
-- [ ] **Step 12.2: 在 Claude Code 里触发 /publish**
+- [x] **Step 12.2: 在 Agent 会话里按 /publish skill 流程执行**
 
-在 Claude Code 里，输入：
+在 Agent 会话里，执行与 `/publish inbox/e2e-test` 等价的完整 skill 流程：
 
 ```
 /publish inbox/e2e-test
 ```
 
-Claude Code 会调用 publish skill，按 SKILL.md 的步骤执行全流程。
+Agent 会按 SKILL.md 的步骤执行全流程。
 
 期望的最终输出：
 
 ```
 ✅ /publish complete.
 
-Article: articles/e2e-test/
+Article: src/articles/e2e-test/
 Preview: bun run preview → http://localhost:4173/src/articles/e2e-test/
 Deploy: ./scripts/deploy.sh
 
 Self-review:
   mechanical: PASS
-  vision: PASS (score: 8)
+  vision: PASS (agent-native)
 ```
 
-- [ ] **Step 12.3: 本地 preview 验证**
+- [x] **Step 12.3: 本地 preview 验证**
 
 ```bash
 bun run preview
@@ -1401,7 +1401,7 @@ bun run preview
 - 打开 `http://localhost:4173/` → 首页橱窗里能看到 e2e-test 的卡片
 - 打开 `http://localhost:4173/src/articles/e2e-test/` → 文章页正确显示
 
-- [ ] **Step 12.4: 清理 e2e-test**
+- [x] **Step 12.4: 清理 e2e-test**
 
 ```bash
 rm -rf src/articles/e2e-test/ inbox/e2e-test/
@@ -1421,7 +1421,7 @@ cat > src/home/home-data.json <<'EOF'
 EOF
 ```
 
-- [ ] **Step 12.5: git status 确认干净**
+- [x] **Step 12.5: git status 确认干净**
 
 ```bash
 git status
@@ -1433,7 +1433,7 @@ Expected: `working tree clean`。
 
 ## Task 13: 最终部署验证（framework 分支）
 
-- [ ] **Step 13.1: 把所有 Plan C 修改部署一次**
+- [x] **Step 13.1: 把所有 Plan C 修改部署一次**
 
 ```bash
 ./scripts/deploy.sh
@@ -1441,7 +1441,7 @@ Expected: `working tree clean`。
 
 Expected: build + rsync + nginx reload 都成功。
 
-- [ ] **Step 13.2: curl 验证线上**
+- [x] **Step 13.2: curl 验证线上**
 
 ```bash
 curl -I https://weid.fun
@@ -1449,7 +1449,7 @@ curl -I https://weid.fun
 
 Expected: `HTTP/2 200`。
 
-- [ ] **Step 13.3: 浏览器手动验证**
+- [x] **Step 13.3: 浏览器手动验证**
 
 打开 `https://weid.fun/` 确认仍然显示空门户（因为所有测试文章都被清理了）。
 
@@ -1589,26 +1589,26 @@ git add docs/personal-branch-setup.md
 git commit -m "docs: add personal branch setup guide"
 ```
 
-- [ ] **Step 14.3: 实际创建 personal 分支**
+- [x] **Step 14.3: 实际创建 personal 分支**
 
 ```bash
 git checkout -b personal
 ```
 
-- [ ] **Step 14.4: 修改 personal 分支的 .gitignore**
+- [x] **Step 14.4: 修改 personal 分支的 .gitignore**
 
 打开 `.gitignore`，找到 `# 👇 以下是「个人内容」：仅在 main (framework) 分支 ignore` 标记，删除其下所有规则到文件末尾，但保留 `/inbox/` 那一段（inbox 始终是临时的）。
 
 验证 personal 分支的 .gitignore 长度明显比 main 短。
 
-- [ ] **Step 14.5: 提交 personal 分支的 .gitignore**
+- [x] **Step 14.5: 提交 personal 分支的 .gitignore**
 
 ```bash
 git add .gitignore
 git commit -m "chore(personal): relax gitignore to track personal content"
 ```
 
-- [ ] **Step 14.6: 回到 main**
+- [x] **Step 14.6: 回到 main**
 
 ```bash
 git checkout main

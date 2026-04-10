@@ -1443,13 +1443,13 @@ git commit -m "chore(deps): add @tailwindcss/typography for article prose"
 
 **目的**：把测试数据清理干净，让 framework 分支回到 pristine 状态。
 
-- [ ] **Step 11.1: 删除本地测试文章**
+- [x] **Step 11.1: 删除本地测试文章**
 
 ```bash
 rm -rf src/articles/hello-weid-fun
 ```
 
-- [ ] **Step 11.2: 还原 home-data.json**
+- [x] **Step 11.2: 还原 home-data.json**
 
 ```bash
 cat > src/home/home-data.json <<'EOF'
@@ -1464,7 +1464,7 @@ cat > src/home/home-data.json <<'EOF'
 EOF
 ```
 
-- [ ] **Step 11.3: 重新 build 确认干净**
+- [x] **Step 11.3: 重新 build 确认干净**
 
 ```bash
 bun run build
@@ -1472,7 +1472,7 @@ bun run build
 
 Expected: 只发现 home + playground_webgl-hero 两个 entry。
 
-- [ ] **Step 11.4: 跑完整 test 套件**
+- [x] **Step 11.4: 跑完整 test 套件**
 
 ```bash
 bun run test:e2e
@@ -1480,7 +1480,7 @@ bun run test:e2e
 
 Expected: 所有之前的 test 仍然 PASS。
 
-- [ ] **Step 11.5: git status 确认干净**
+- [x] **Step 11.5: git status 确认干净**
 
 ```bash
 git status
@@ -1492,13 +1492,13 @@ Expected: `working tree clean`。
 
 ## Task 12: 打 tag `plan-b-complete`
 
-- [ ] **Step 12.1: 打 tag**
+- [x] **Step 12.1: 打 tag**
 
 ```bash
 git tag -a plan-b-complete -m "Plan B complete: /publish skill MVP + WebGLHero + self-review mechanical"
 ```
 
-- [ ] **Step 12.2: 报告**
+- [x] **Step 12.2: 报告**
 
 ```
 ✅ Plan B 完成。
