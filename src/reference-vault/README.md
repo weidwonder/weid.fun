@@ -18,8 +18,8 @@ src/reference-vault/
 
 ## Usage by Self-Review
 
-The Claude Vision review step (see `scripts/publish/vision-review.ts`) loads all
-reference images from this directory and asks:
+视觉评审准备步骤（见 `scripts/publish/vision-review.ts`）会整理这个目录里的
+reference images，随后由 Agent 在 `/publish` skill 里自行判断：
 
 > "Does this new article feel like it belongs in the same family as these references?"
 

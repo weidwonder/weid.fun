@@ -183,7 +183,7 @@ bun run build
 
 期望：没有构建错误。如果有，**不要 escalate**，而是读错误消息修 `page.tsx` 直到构建通过。
 
-### Step 7 · 自审循环（机械 + Vision 两阶段）
+### Step 7 · 自审循环（机械 + 视觉评审 两阶段）
 
 **阶段 1: 机械检查**
 
@@ -195,23 +195,51 @@ bun run scripts/self-review.ts /src/articles/<slug>/
 - 若 `pass=false`：读 issues，修改 `page.tsx`，回到 Step 6（build）
 - 若 `pass=true`：进入阶段 2
 
-**阶段 2: Claude Vision 评审（需要 ANTHROPIC_API_KEY）**
+**阶段 2: Agent 视觉评审（不依赖厂商 API）**
 
-检查环境变量：
-```bash
-[ -n "$ANTHROPIC_API_KEY" ] && echo "ok" || echo "skip"
-```
-
-- 若 `skip`：跳过阶段 2，直接进入 Step 8。在最终报告里标注 `vision review skipped (no API key)`
-- 若 `ok`：运行
+先运行：
 
 ```bash
 bun run scripts/publish/vision-review.ts <slug>
 ```
 
-读取输出 JSON：
+这个脚本只会准备评审材料并输出 JSON，包含：
+- 三个断点截图的绝对路径
+- 合并后的 hard rules 文件路径
+- review prompt 文件路径
+- reference vault 图片和说明文件路径
+
+然后你必须亲自完成视觉评审：
+1. 读取这个 JSON
+2. 读取 `hardRulesPath` 和 `reviewPromptPath`
+3. 用 `view_image` 查看每张 screenshot
+4. 若 `references` 非空：对每张 reference image 也用 `view_image` 查看；若有 `notesPath`，再读取说明
+5. 根据这些材料，产出一个**内部使用**的评审 JSON，格式必须是：
+
+```json
+{
+  "pass": true,
+  "score": 0,
+  "hardRuleViolations": [
+    {
+      "rule": "R1",
+      "description": "..."
+    }
+  ],
+  "issues": ["..."],
+  "suggestions": ["..."]
+}
+```
+
+判定规则：
+- 任何明确 hard rule 违规，都应强烈倾向于 `pass=false`
+- 优先抓响应式问题、层级问题、视觉节奏问题、移动端可用性问题
+- 如果页面明显有“AI 套模板感”，直接记为 issue
+- 如果 reference vault 存在，判断新页面是否属于同一视觉家族
+
+读取你自己的评审 JSON：
 - 若 `pass=true`：进入 Step 8
-- 若 `pass=false` 且已迭代 <3 次：读 suggestions，修改 `page.tsx`，回到 Step 6
+- 若 `pass=false` 且已迭代 <3 次：读 `suggestions`，修改 `page.tsx`，回到 Step 6
 - 若 `pass=false` 且迭代 ≥3 次：stop。报告所有 `hardRuleViolations` 和 `issues` 给用户
 
 **迭代次数计数**：机械检查和 vision 评审共享同一个迭代计数器，总上限 3。
