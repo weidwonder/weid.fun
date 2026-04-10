@@ -1620,19 +1620,19 @@ git checkout main
 
 ## Task 15: 打 tag `plan-c-complete` + 完成报告
 
-- [ ] **Step 15.1: 打 tag**
+- [x] **Step 15.1: 打 tag**
 
 ```bash
 git tag -a plan-c-complete -m "Plan C complete: full component vault, vision review, series, personal branch"
 ```
 
-- [ ] **Step 15.2: 完整 git log 回顾**
+- [x] **Step 15.2: 完整 git log 回顾**
 
 ```bash
 git log --oneline main --decorate
 ```
 
-- [ ] **Step 15.3: 报告**
+- [x] **Step 15.3: 报告**
 
 ```
 ✅ Plan C 完成。weid.fun 框架已就绪。
