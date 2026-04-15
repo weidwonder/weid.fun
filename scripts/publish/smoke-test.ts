@@ -64,3 +64,79 @@ export function formatSmokeResult(siteUrl: string, checks: SmokeCheck[]): SmokeR
     checks,
   }
 }
+
+import { sanitizeSlug } from '../lib/project.ts'
+
+const PER_REQUEST_TIMEOUT_MS = 10_000
+
+async function headOnce(
+  url: string,
+  timeoutMs: number,
+): Promise<{ status: number | null; contentType: string | null; error?: string }> {
+  const controller = new AbortController()
+  const timer = setTimeout(() => controller.abort(), timeoutMs)
+  try {
+    const response = await fetch(url, {
+      method: 'HEAD',
+      redirect: 'manual',
+      signal: controller.signal,
+    })
+    return {
+      status: response.status,
+      contentType: response.headers.get('content-type'),
+    }
+  } catch (err) {
+    return { status: null, contentType: null, error: (err as Error).message }
+  } finally {
+    clearTimeout(timer)
+  }
+}
+
+export async function probe(url: string, timeoutMs = PER_REQUEST_TIMEOUT_MS): Promise<SmokeCheck> {
+  const first = await headOnce(url, timeoutMs)
+  if (first.status !== null) {
+    return evaluateCheck(url, first.status, first.contentType)
+  }
+
+  const second = await headOnce(url, timeoutMs)
+  if (second.status !== null) {
+    return evaluateCheck(url, second.status, second.contentType)
+  }
+
+  return evaluateCheck(url, null, null, second.error ?? first.error)
+}
+
+async function main() {
+  const rawSlug = process.argv[2]
+  if (!rawSlug) {
+    process.stderr.write('Usage: smoke-test.ts <slug>\n')
+    process.exit(3)
+  }
+
+  const siteUrl = process.env.WEID_SITE_URL
+  if (!siteUrl) {
+    process.stderr.write(
+      '[smoke-test] WEID_SITE_URL not set (did caller forget `eval $(deploy-config.ts load)`?)\n',
+    )
+    process.exit(2)
+  }
+
+  const slug = sanitizeSlug(rawSlug)
+  const targets = buildSmokeTargets(siteUrl, slug)
+
+  const checks: SmokeCheck[] = []
+  for (const target of targets) {
+    checks.push(await probe(target.url))
+  }
+
+  const result = formatSmokeResult(siteUrl, checks)
+  process.stdout.write(`${JSON.stringify(result, null, 2)}\n`)
+  process.exit(result.pass ? 0 : 1)
+}
+
+if (import.meta.main) {
+  main().catch((err) => {
+    process.stderr.write(`[smoke-test] fatal: ${(err as Error).message}\n`)
+    process.exit(3)
+  })
+}
