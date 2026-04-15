@@ -158,6 +158,18 @@ export function saveToFile(filePath: string, partial: DeployConfig): void {
   fs.chmodSync(filePath, 0o600)
 }
 
+export function formatLoadOutput(cfg: DeployConfig): string {
+  const lines: string[] = []
+  for (const key of CONFIG_KEYS) {
+    const value = cfg[key]
+    if (value !== undefined && value !== '') {
+      lines.push(`export ${key}=${shellEscape(value)}`)
+    }
+  }
+
+  return lines.length === 0 ? '' : `${lines.join('\n')}\n`
+}
+
 function envAsConfig(): DeployConfig {
   const result: DeployConfig = {}
   for (const key of CONFIG_KEYS) {
@@ -228,6 +240,26 @@ async function main() {
       }
 
       process.stdout.write(`${JSON.stringify({ status: 'saved', path: filePath })}\n`)
+      process.exit(0)
+      return
+    }
+    case 'load': {
+      let fileConfig: DeployConfig
+      try {
+        fileConfig = loadFromFile()
+      } catch (err) {
+        process.stderr.write(`[deploy-config:load] ${(err as Error).message}\n`)
+        process.exit(1)
+      }
+
+      const merged = mergeConfig(fileConfig, envAsConfig())
+      const check = checkRequired(merged)
+      if (check.status === 'missing') {
+        process.stderr.write(`${JSON.stringify(check)}\n`)
+        process.exit(1)
+      }
+
+      process.stdout.write(formatLoadOutput(merged))
       process.exit(0)
       return
     }

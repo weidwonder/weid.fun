@@ -6,6 +6,7 @@ import {
   CONFIG_KEYS,
   type DeployConfig,
   checkRequired,
+  formatLoadOutput,
   loadFromFile,
   mergeConfig,
   parseConfigFile,
@@ -126,6 +127,36 @@ describe('deploy-config · shellEscape', () => {
 
   test('escapes embedded single quotes', () => {
     expect(shellEscape("it's")).toBe(`'it'\\''s'`)
+  })
+})
+
+describe('deploy-config · formatLoadOutput', () => {
+  test('emits export lines for all present keys in stable order', () => {
+    const output = formatLoadOutput({
+      WEID_DEPLOY_SERVER: 'root@10.14.0.1',
+      WEID_REMOTE_PATH: '/var/www/weid.fun/',
+      WEID_SITE_URL: 'https://weid.fun',
+    })
+    const lines = output.trim().split('\n')
+    expect(lines[0]).toBe('export WEID_DEPLOY_SERVER=root@10.14.0.1')
+    expect(lines[1]).toBe('export WEID_REMOTE_PATH=/var/www/weid.fun/')
+    expect(lines[2]).toBe('export WEID_SITE_URL=https://weid.fun')
+  })
+
+  test('applies shell escaping to values with spaces', () => {
+    const output = formatLoadOutput({
+      WEID_DEPLOY_SERVER: 'root@host',
+      WEID_REMOTE_PATH: '/var/www/with space/',
+      WEID_SITE_URL: 'https://weid.fun',
+    })
+    expect(output).toContain(`export WEID_REMOTE_PATH='/var/www/with space/'`)
+  })
+
+  test('skips keys that are missing', () => {
+    const output = formatLoadOutput({ WEID_DEPLOY_SERVER: 'root@host', WEID_SITE_URL: 'https://weid.fun' })
+    expect(output).toContain('WEID_DEPLOY_SERVER')
+    expect(output).toContain('WEID_SITE_URL')
+    expect(output).not.toContain('WEID_REMOTE_PATH')
   })
 })
 
