@@ -1,10 +1,15 @@
 import { describe, expect, test } from 'bun:test'
+import fs from 'node:fs'
+import os from 'node:os'
+import path from 'node:path'
 import {
   CONFIG_KEYS,
   type DeployConfig,
   checkRequired,
+  loadFromFile,
   mergeConfig,
   parseConfigFile,
+  resolveConfigPath,
   serializeConfigFile,
   shellEscape,
 } from './deploy-config.ts'
@@ -126,5 +131,68 @@ describe('deploy-config · shellEscape', () => {
 describe('deploy-config · CONFIG_KEYS', () => {
   test('exports exactly three keys in stable order', () => {
     expect(CONFIG_KEYS).toEqual(['WEID_DEPLOY_SERVER', 'WEID_REMOTE_PATH', 'WEID_SITE_URL'])
+  })
+})
+
+describe('deploy-config · resolveConfigPath', () => {
+  test('honors XDG_CONFIG_HOME when set', () => {
+    const restored = process.env.XDG_CONFIG_HOME
+    try {
+      process.env.XDG_CONFIG_HOME = '/tmp/xdg-test'
+      expect(resolveConfigPath()).toBe('/tmp/xdg-test/weid.fun/deploy.env')
+    } finally {
+      if (restored === undefined) delete process.env.XDG_CONFIG_HOME
+      else process.env.XDG_CONFIG_HOME = restored
+    }
+  })
+
+  test('falls back to HOME/.config when XDG_CONFIG_HOME missing', () => {
+    const restoredXdg = process.env.XDG_CONFIG_HOME
+    const restoredHome = process.env.HOME
+    try {
+      delete process.env.XDG_CONFIG_HOME
+      process.env.HOME = '/tmp/home-test'
+      expect(resolveConfigPath()).toBe('/tmp/home-test/.config/weid.fun/deploy.env')
+    } finally {
+      if (restoredXdg !== undefined) process.env.XDG_CONFIG_HOME = restoredXdg
+      if (restoredHome !== undefined) process.env.HOME = restoredHome
+    }
+  })
+})
+
+describe('deploy-config · loadFromFile', () => {
+  test('returns empty object when file missing', () => {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'deploy-config-'))
+    try {
+      const cfg = loadFromFile(path.join(dir, 'missing.env'))
+      expect(cfg).toEqual({})
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true })
+    }
+  })
+
+  test('parses an existing file', () => {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'deploy-config-'))
+    try {
+      const filePath = path.join(dir, 'deploy.env')
+      fs.writeFileSync(filePath, 'export WEID_DEPLOY_SERVER=root@host\nexport WEID_SITE_URL=https://weid.fun\n')
+      const cfg = loadFromFile(filePath)
+      expect(cfg.WEID_DEPLOY_SERVER).toBe('root@host')
+      expect(cfg.WEID_SITE_URL).toBe('https://weid.fun')
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true })
+    }
+  })
+
+  test('throws on malformed file when strict', () => {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'deploy-config-'))
+    try {
+      const filePath = path.join(dir, 'deploy.env')
+      fs.writeFileSync(filePath, 'not-a-valid-config-at-all\n\n\n')
+      const cfg = loadFromFile(filePath)
+      expect(cfg).toEqual({})
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true })
+    }
   })
 })

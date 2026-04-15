@@ -1,4 +1,6 @@
 #!/usr/bin/env bun
+import fs from 'node:fs'
+import path from 'node:path'
 /**
  * deploy-config.ts · 机器级部署配置的读写 + 合并
  *
@@ -107,4 +109,79 @@ export function shellEscape(value: string): string {
   }
 
   return `'${value.replace(/'/g, `'\\''`)}'`
+}
+
+export function resolveConfigPath(): string {
+  const xdg = process.env.XDG_CONFIG_HOME
+  if (xdg) {
+    return path.join(xdg, 'weid.fun', 'deploy.env')
+  }
+
+  const home = process.env.HOME
+  if (!home) {
+    throw new Error('deploy-config: neither XDG_CONFIG_HOME nor HOME is set')
+  }
+
+  return path.join(home, '.config', 'weid.fun', 'deploy.env')
+}
+
+export function loadFromFile(filePath: string = resolveConfigPath()): DeployConfig {
+  if (!fs.existsSync(filePath)) return {}
+
+  let raw: string
+  try {
+    raw = fs.readFileSync(filePath, 'utf-8')
+  } catch (err) {
+    throw new Error(`deploy-config: cannot read ${filePath}: ${(err as Error).message}`)
+  }
+
+  return parseConfigFile(raw)
+}
+
+function envAsConfig(): DeployConfig {
+  const result: DeployConfig = {}
+  for (const key of CONFIG_KEYS) {
+    const value = process.env[key]
+    if (value !== undefined && value !== '') {
+      result[key] = value
+    }
+  }
+
+  return result
+}
+
+function runCheck(): number {
+  let fileConfig: DeployConfig
+  try {
+    fileConfig = loadFromFile()
+  } catch (err) {
+    process.stdout.write(
+      `${JSON.stringify({ status: 'error', reason: 'file-unreadable', message: (err as Error).message })}\n`,
+    )
+    return 1
+  }
+
+  const merged = mergeConfig(fileConfig, envAsConfig())
+  const result = checkRequired(merged)
+  process.stdout.write(`${JSON.stringify(result)}\n`)
+  return result.status === 'ok' ? 0 : 1
+}
+
+async function main() {
+  const sub = process.argv[2]
+  switch (sub) {
+    case 'check':
+      process.exit(runCheck())
+      return
+    default:
+      process.stderr.write('Usage: deploy-config.ts <check|save|load>\n')
+      process.exit(1)
+  }
+}
+
+if (import.meta.main) {
+  main().catch((err) => {
+    process.stderr.write(`[deploy-config] fatal: ${(err as Error).message}\n`)
+    process.exit(1)
+  })
 }
