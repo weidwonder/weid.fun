@@ -138,6 +138,26 @@ export function loadFromFile(filePath: string = resolveConfigPath()): DeployConf
   return parseConfigFile(raw)
 }
 
+export function saveToFile(filePath: string, partial: DeployConfig): void {
+  const existing = loadFromFile(filePath)
+  const merged: DeployConfig = { ...existing }
+  for (const key of CONFIG_KEYS) {
+    const value = partial[key]
+    if (value !== undefined && value !== '') {
+      merged[key] = value
+    }
+  }
+
+  const dir = path.dirname(filePath)
+  fs.mkdirSync(dir, { recursive: true, mode: 0o700 })
+
+  const serialized = serializeConfigFile(merged)
+  const tmpPath = `${filePath}.tmp.${process.pid}`
+  fs.writeFileSync(tmpPath, serialized, { mode: 0o600 })
+  fs.renameSync(tmpPath, filePath)
+  fs.chmodSync(filePath, 0o600)
+}
+
 function envAsConfig(): DeployConfig {
   const result: DeployConfig = {}
   for (const key of CONFIG_KEYS) {
@@ -173,6 +193,44 @@ async function main() {
     case 'check':
       process.exit(runCheck())
       return
+    case 'save': {
+      const chunks: Buffer[] = []
+      for await (const chunk of process.stdin) {
+        chunks.push(Buffer.from(chunk))
+      }
+
+      let payload: DeployConfig
+      try {
+        payload = JSON.parse(Buffer.concat(chunks).toString('utf-8'))
+      } catch (err) {
+        process.stdout.write(
+          `${JSON.stringify({ status: 'error', reason: 'invalid-json', message: (err as Error).message })}\n`,
+        )
+        process.exit(1)
+      }
+
+      const filtered: DeployConfig = {}
+      for (const key of CONFIG_KEYS) {
+        const value = payload[key]
+        if (typeof value === 'string' && value.length > 0) {
+          filtered[key] = value
+        }
+      }
+
+      const filePath = resolveConfigPath()
+      try {
+        saveToFile(filePath, filtered)
+      } catch (err) {
+        process.stdout.write(
+          `${JSON.stringify({ status: 'error', reason: 'write-failed', message: (err as Error).message })}\n`,
+        )
+        process.exit(1)
+      }
+
+      process.stdout.write(`${JSON.stringify({ status: 'saved', path: filePath })}\n`)
+      process.exit(0)
+      return
+    }
     default:
       process.stderr.write('Usage: deploy-config.ts <check|save|load>\n')
       process.exit(1)

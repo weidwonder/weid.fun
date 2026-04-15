@@ -10,6 +10,7 @@ import {
   mergeConfig,
   parseConfigFile,
   resolveConfigPath,
+  saveToFile,
   serializeConfigFile,
   shellEscape,
 } from './deploy-config.ts'
@@ -191,6 +192,61 @@ describe('deploy-config · loadFromFile', () => {
       fs.writeFileSync(filePath, 'not-a-valid-config-at-all\n\n\n')
       const cfg = loadFromFile(filePath)
       expect(cfg).toEqual({})
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true })
+    }
+  })
+})
+
+describe('deploy-config · saveToFile', () => {
+  test('writes file with 0600 permissions and mkdir -p', () => {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'deploy-config-save-'))
+    try {
+      const filePath = path.join(dir, 'nested', 'deploy.env')
+      saveToFile(filePath, {
+        WEID_DEPLOY_SERVER: 'root@10.14.0.1',
+        WEID_SITE_URL: 'https://weid.fun',
+      })
+
+      expect(fs.existsSync(filePath)).toBe(true)
+      const stat = fs.statSync(filePath)
+      expect(stat.mode & 0o777).toBe(0o600)
+
+      const reloaded = loadFromFile(filePath)
+      expect(reloaded.WEID_DEPLOY_SERVER).toBe('root@10.14.0.1')
+      expect(reloaded.WEID_SITE_URL).toBe('https://weid.fun')
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true })
+    }
+  })
+
+  test('merges with existing file (partial save)', () => {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'deploy-config-save-'))
+    try {
+      const filePath = path.join(dir, 'deploy.env')
+      saveToFile(filePath, { WEID_DEPLOY_SERVER: 'initial@host', WEID_SITE_URL: 'https://weid.fun' })
+
+      // now only update WEID_DEPLOY_SERVER
+      saveToFile(filePath, { WEID_DEPLOY_SERVER: 'updated@host' })
+
+      const reloaded = loadFromFile(filePath)
+      expect(reloaded.WEID_DEPLOY_SERVER).toBe('updated@host')
+      expect(reloaded.WEID_SITE_URL).toBe('https://weid.fun')
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true })
+    }
+  })
+
+  test('atomic: uses tmp file + rename (no partial file on error)', () => {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'deploy-config-save-'))
+    try {
+      const filePath = path.join(dir, 'deploy.env')
+      saveToFile(filePath, { WEID_DEPLOY_SERVER: 'root@host' })
+
+      // after save, no leftover tmp files in dir
+      const entries = fs.readdirSync(dir)
+      expect(entries.filter((name) => name.includes('.tmp'))).toEqual([])
+      expect(entries).toContain('deploy.env')
     } finally {
       fs.rmSync(dir, { recursive: true, force: true })
     }
