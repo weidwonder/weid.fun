@@ -9,20 +9,20 @@ You are executing the publish pipeline for weid.fun. Follow the steps **in order
 
 ## Step -1 · 项目根解析（Project root resolution）
 
-本 skill 与 weid.fun 仓库强耦合，所有后续命令都假设 CWD 在项目根。进入 Phase 0 前必须先把 CWD 固定好。
+本 skill 与 weid.fun 仓库强耦合，skill 本体住在 `<项目根>/skills/publish/SKILL.md`，所以项目根可以自探测，无需任何外部配置（环境变量、dotfile 都不用）。所有后续命令都假设 CWD 在项目根，进入 Phase 0 前必须先把 CWD 固定好。
 
 解析顺序：
 
-1. 若环境变量 `WEID_PROJECT_ROOT` 存在，用它作为项目根
-2. 否则检查当前 CWD 是否同时包含 `scripts/publish/deploy-config.ts` 和 `src/home/home-data.json`；是就用 CWD
+1. 若当前 CWD 同时包含 `scripts/publish/deploy-config.ts` 和 `src/home/home-data.json`，直接用 CWD
+2. 否则跑 `git rev-parse --show-toplevel` 拿 git 根，若同样通过上面两个文件的校验，`cd` 过去
 3. 否则**询问用户**一次项目绝对路径（这是除 Phase 0 / Step 0 外唯一允许提问的时机）
 
-拿到候选路径后，验证目录里**同时**存在下列两个文件，否则视为无效，重问或报错终止：
+任何一步拿到的候选路径都必须**同时**存在下列两个文件才算有效，否则继续往下一步或终止：
 
 - `scripts/publish/deploy-config.ts`
 - `src/home/home-data.json`
 
-验证通过后执行 `cd <root>` 切进项目根；后续所有 `bun run ...`、相对路径都基于这个 CWD。用户拒绝 / 路径无效且重试失败就**终止管线**。
+校验通过后执行 `cd <root>`；后续所有 `bun run ...` 与相对路径都基于这个 CWD。用户拒绝 / 路径无效且重试失败就**终止管线**。
 
 ## Phase 0 · Intake（可选共创阶段）
 
