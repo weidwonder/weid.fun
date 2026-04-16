@@ -281,8 +281,10 @@ bun run scripts/self-review.ts /src/articles/<slug>/
 先运行：
 
 ```bash
-bun run scripts/publish/vision-review.ts <slug>
+bun run scripts/publish/vision-review.ts <slug> [--kind article|series]
 ```
+
+`--kind` 默认为 `article`（对应 `/src/articles/<slug>/`）。系列首篇在 Step 11c 会再跑一次 `--kind series`（对应 `/src/series/<series-slug>/`）给系列入口页做评审。
 
 这个脚本只会准备评审材料并输出 JSON，包含：
 - `sessionDir`：当前文章这轮自审的稳定工作目录
@@ -401,9 +403,17 @@ bun run scripts/publish/series-create-page.ts <series-slug>
 作用：
 
 1. `series-write.ts` 从首篇的 `meta.json` 提取 colors / seriesName / seriesTagline 和从 `page.tsx` 扫出 primitives，写入 `src/series/<series-slug>/spec.json`
-2. `series-create-page.ts` 在同目录下生成 `index.html` / `main.tsx` / `page.tsx` —— 系列入口页，会运行时从 `home-data.json` 过滤本系列文章并按发布时间倒序列出
+2. `series-create-page.ts` 在同目录下生成 `index.html` / `main.tsx` / `page.tsx` —— 系列入口页，会运行时从 `home-data.json` 过滤本系列文章并按发布时间倒序列出。**副作用**：脚本末尾会自动执行 `update-home-data.ts --series-only`，把本系列 materialize 到 `home-data.json.series[]`，首页 SeriesRail 随即出现。Agent 不需要再手动触发。
 
-生成完后需要**再跑一次 `bun run build`** 让 vite 发现新的 entry，并在 Step 8 之前完成（建议把 Step 11 的两条命令插在 Step 5 之后、Step 6 之前；若是非首篇，Step 11 整体跳过）。
+生成完后需要**再跑一次 `bun run build`** 让 vite 发现新的 entry。
+
+**Step 11c · 系列入口页视觉评审（仅首篇）**：build 通过后，对系列入口页再跑一次 Step 7 的视觉评审循环，命令替换为：
+
+```bash
+bun run scripts/publish/vision-review.ts <series-slug> --kind series
+```
+
+流程与 Step 7 阶段 2 完全一致（读 screenshots / 写 agentVerdict），共享同一个 iteration 计数器。入口页评审通过后再进入 Step 8 deploy。
 
 **系列首篇的实际执行顺序**：
 
@@ -416,9 +426,11 @@ Step 3  写文章 page.tsx
 Step 4  写文章 index.html + main.tsx
 Step 5  update-home-data
 Step 11a series-write           ← 首篇额外
-Step 11b series-create-page     ← 首篇额外
+Step 11b series-create-page     ← 首篇额外（自动刷新 home series）
 Step 6  bun run build
-Step 7+ 自审 / deploy / smoke / 报告
+Step 7  文章自审（--kind article，默认）
+Step 11c 系列入口页自审（--kind series）  ← 首篇额外
+Step 8+ deploy / smoke / 报告
 ```
 
 ## 禁令
