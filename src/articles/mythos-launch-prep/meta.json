@@ -1,0 +1,13 @@
+{
+  "slug": "mythos-launch-prep",
+  "title": "Mythos 要发了吧？",
+  "series": "ai-trends",
+  "seriesName": "AI 趋势",
+  "publishedAt": "2026-04-16",
+  "pin": true,
+  "colors": {
+    "primary": "#E94560",
+    "bg": "#0F1419"
+  },
+  "excerpt": "> AI 趋势系列 · 第 1 篇 4 月 14 号，Anthropic 在帮助中心底下悄悄加了一条公告：Claude 的某些功能要验身份了。护照原件，对着摄像头自拍一张，Persona 核验，五分钟完事。 你要说这公告有啥大新闻？真没有。反滥用、防羊毛、合规要求，每个字都挑不出毛病。 但把时间线摊开，就是另一回事了。"
+}

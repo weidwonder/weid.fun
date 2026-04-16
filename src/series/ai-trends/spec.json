@@ -1,0 +1,15 @@
+{
+  "seriesSlug": "ai-trends",
+  "seriesName": "AI 趋势",
+  "originSlug": "mythos-launch-prep",
+  "createdAt": "2026-04-16T03:18:48.099Z",
+  "colors": {
+    "primary": "#E94560",
+    "bg": "#0F1419"
+  },
+  "primitives": [
+    "CornerMarker",
+    "WebGLHero"
+  ],
+  "note": "Generated from the first article. Subsequent articles in this series should honor these constraints."
+}
