@@ -3,7 +3,7 @@
 > **最后更新**: 2026-04-09
 > **状态**: Active · Living Document
 
-本文档记录 weid.fun 项目的**架构决策**及**理由**。需求见 `docs/requirements.md`，完整设计见 `docs/superpowers/specs/2026-04-09-weid-fun-blog-design.md`。
+本文档记录 weid.fun 项目的**架构决策**及**理由**。需求见 `docs/requirements.md`。
 
 ---
 
@@ -25,7 +25,7 @@
 │   ⑤ 写 page.tsx / index.html / meta.json                     │
 │   ⑥ 更新 vite.config.ts + home-data.json                     │
 │   ⑦ bun run build                                            │
-│   ⑧ 自审循环 (Playwright + Claude Vision, 最多 3 轮)         │
+│   ⑧ 自审循环 (Playwright + Agent 视觉评审, 最多 3 轮)       │
 │   ⑨ 系列首篇: 写 series/<name>/spec.json                     │
 └────────────────────────┬────────────────────────────────────┘
                          ▼
@@ -136,7 +136,7 @@
 
 ### ADR-007: Agent 全自动 + 自审循环
 
-**决策**: `/publish` skill 从触发到完成不需要作者中途介入。质量控制靠 Agent 自审循环：**Playwright 多断点截图 → Claude Vision 评审 → 迭代修复 → 最多 3 轮**。
+**决策**: `/publish` skill 从触发到完成不需要作者中途介入。质量控制靠 Agent 自审循环：**Playwright 多断点截图 → Agent 视觉评审 → 迭代修复 → 最多 3 轮**。
 
 **理由**:
 1. 符合「vibe coding」的 UX 直觉：扔进去 → 回来看结果
@@ -236,7 +236,7 @@
 | 样式 | Tailwind CSS + 自定义 CSS | ADR-003 |
 | 包管理/运行时 | Bun | 性能 + TS native |
 | 自审渲染 | Playwright | 成熟 + 多断点支持 |
-| 自审评审 | Claude Vision | 理解视觉品质 |
+| 自审评审 | Agent 自主视觉判断 | 直接在 skill 内完成视觉品质判断 |
 | 补图 | baoyu-article-illustrator | 项目已有 skill |
 | 部署 | rsync + nginx | 纯静态，SSL 已就绪 |
 
@@ -282,7 +282,7 @@ weid.fun/
 浏览器: https://weid.fun
 ```
 
-详见 `docs/deployment/2026-04-09-ssl证书部署.md`。
+nginx 配置模板见 `scripts/nginx/weid.fun.conf`。
 
 ## 6. 演化路径
 

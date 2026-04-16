@@ -33,6 +33,14 @@ export function AudioPad({
     audio.loop = loop
   }, [volume, loop])
 
+  useEffect(() => {
+    const audio = audioRef.current
+    setError(false)
+    setPlaying(false)
+    audio?.pause()
+    audio?.load()
+  }, [src])
+
   const toggle = async () => {
     const audio = audioRef.current
     if (!audio) return

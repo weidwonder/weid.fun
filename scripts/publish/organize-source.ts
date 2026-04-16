@@ -5,17 +5,27 @@
 
 import fs from 'node:fs'
 import path from 'node:path'
+import {
+  resolveArticleDir,
+  resolveCliPath,
+  sanitizeSlug,
+  slugifySegment,
+  validateSlug,
+} from '../lib/project.ts'
 
 interface Args {
   inboxPath: string
   slug?: string
-  series?: string
+  seriesSlug?: string
+  seriesName?: string
   pin: boolean
 }
 
 function parseArgs(argv: string[]): Args {
   if (argv.length === 0) {
-    console.error('Usage: organize-source.ts <inbox-path> [--slug <s>] [--series <s>] [--pin]')
+    console.error(
+      'Usage: organize-source.ts <inbox-path> [--slug <s>] [--series-slug <s> --series-name <name>] [--pin]',
+    )
     process.exit(1)
   }
 
@@ -23,22 +33,31 @@ function parseArgs(argv: string[]): Args {
   for (let i = 1; i < argv.length; i++) {
     const arg = argv[i]
     if (arg === '--slug') args.slug = argv[++i]
-    else if (arg === '--series') args.series = argv[++i]
+    else if (arg === '--series-slug') args.seriesSlug = argv[++i]
+    else if (arg === '--series-name') args.seriesName = argv[++i]
     else if (arg === '--pin') args.pin = true
   }
+
+  if ((args.seriesSlug && !args.seriesName) || (!args.seriesSlug && args.seriesName)) {
+    console.error('Error: --series-slug and --series-name must be provided together.')
+    process.exit(1)
+  }
+
   return args
 }
 
 function slugify(text: string): string {
-  return (
-    text
-      .toLowerCase()
-      .trim()
-      .replace(/[^\w\s-]/g, ' ')
-      .replace(/[\s_-]+/g, '-')
-      .replace(/^-+|-+$/g, '')
-      .slice(0, 60) || 'untitled'
-  )
+  return slugifySegment(text)
+}
+
+export function buildExcerpt(rawMd: string): string {
+  return rawMd
+    .replace(/^---[\s\S]*?---\n*/m, '')
+    .replace(/```[\s\S]*?```/g, ' ')
+    .replace(/^#.*$/gm, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, 160)
 }
 
 function extractTitle(rawMd: string): string {
@@ -68,13 +87,14 @@ function copyRecursive(src: string, dest: string) {
 
 async function main() {
   const args = parseArgs(process.argv.slice(2))
+  const inboxPath = resolveCliPath(args.inboxPath)
 
-  if (!fs.existsSync(args.inboxPath)) {
-    console.error(`Error: ${args.inboxPath} does not exist`)
+  if (!fs.existsSync(inboxPath)) {
+    console.error(`Error: ${inboxPath} does not exist`)
     process.exit(1)
   }
 
-  const rawMdPath = path.join(args.inboxPath, 'raw.md')
+  const rawMdPath = path.join(inboxPath, 'raw.md')
   if (!fs.existsSync(rawMdPath)) {
     console.error(`Error: ${rawMdPath} does not exist. inbox/<name>/ must contain raw.md`)
     process.exit(1)
@@ -82,28 +102,31 @@ async function main() {
 
   const rawMd = fs.readFileSync(rawMdPath, 'utf-8')
   const title = extractTitle(rawMd)
-  const slug = args.slug || slugify(title)
+  const slug = sanitizeSlug(args.slug ? args.slug : slugify(title))
 
-  const articleDir = path.join('src', 'articles', slug)
+  const articleDir = resolveArticleDir(slug)
   if (fs.existsSync(articleDir)) {
     console.error(`Error: ${articleDir} already exists. Delete it first to regenerate.`)
     process.exit(1)
   }
 
   const sourceDir = path.join(articleDir, 'source')
-  copyRecursive(args.inboxPath, sourceDir)
+  copyRecursive(inboxPath, sourceDir)
+
+  const seriesSlug = args.seriesSlug ? validateSlug(args.seriesSlug, 'series slug') : undefined
 
   const meta = {
     slug,
     title,
-    series: args.series || undefined,
+    series: seriesSlug,
+    seriesName: args.seriesName || undefined,
     publishedAt: new Date().toISOString().slice(0, 10),
     pin: args.pin,
     colors: {
       primary: '#8338ec',
       bg: '#000000',
     },
-    excerpt: rawMd.replace(/^#.*$/gm, '').replace(/\s+/g, ' ').trim().slice(0, 160),
+    excerpt: buildExcerpt(rawMd),
   }
 
   fs.writeFileSync(path.join(articleDir, 'meta.json'), `${JSON.stringify(meta, null, 2)}\n`)
@@ -112,7 +135,9 @@ async function main() {
   console.log(`SLUG=${slug}`)
 }
 
-main().catch((err) => {
-  console.error('[organize-source] fatal:', err)
-  process.exit(1)
-})
+if (import.meta.main) {
+  main().catch((err) => {
+    console.error('[organize-source] fatal:', err)
+    process.exit(1)
+  })
+}

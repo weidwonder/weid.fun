@@ -4,16 +4,17 @@
  */
 
 import fs from 'node:fs'
-import path from 'node:path'
+import { resolveSeriesPath, validateSlug } from '../lib/project.ts'
 
 function main() {
-  const name = process.argv[2]
-  if (!name) {
-    console.error('Usage: series-read.ts <series-name>')
+  const rawSlug = process.argv[2]
+  if (!rawSlug) {
+    console.error('Usage: series-read.ts <series-slug>')
     process.exit(1)
   }
 
-  const specPath = path.join('series', name, 'spec.json')
+  const seriesSlug = validateSlug(rawSlug, 'series slug')
+  const specPath = resolveSeriesPath(seriesSlug, 'spec.json')
   if (!fs.existsSync(specPath)) {
     console.log('FIRST')
     return

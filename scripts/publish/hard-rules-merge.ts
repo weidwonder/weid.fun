@@ -4,15 +4,14 @@
  */
 
 import fs from 'node:fs'
-import path from 'node:path'
+import { resolveProjectPath } from '../lib/project.ts'
 
-function main() {
-  const baselinePath = path.join('src', 'standards', 'hard-rules.md')
-  const customPath = path.join('src', 'standards', 'hard-rules.custom.md')
+export function mergeHardRules(): string {
+  const baselinePath = resolveProjectPath('src', 'standards', 'hard-rules.md')
+  const customPath = resolveProjectPath('src', 'standards', 'hard-rules.custom.md')
 
   if (!fs.existsSync(baselinePath)) {
-    console.error(`Error: ${baselinePath} not found`)
-    process.exit(1)
+    throw new Error(`Error: ${baselinePath} not found`)
   }
 
   const baseline = fs.readFileSync(baselinePath, 'utf-8')
@@ -31,7 +30,13 @@ function main() {
     custom || '*(no custom rules)*',
   ].join('\n')
 
-  console.log(merged)
+  return merged
 }
 
-main()
+function main() {
+  console.log(mergeHardRules())
+}
+
+if (import.meta.main) {
+  main()
+}

@@ -48,7 +48,7 @@ export function Vitrine({ articles }: VitrineProps) {
               key={article.slug}
               href={`/src/articles/${article.slug}/`}
               data-testid={`vitrine-card-${article.slug}`}
-              className="group relative block aspect-[4/5] overflow-hidden rounded-lg transition-transform hover:scale-[1.02]"
+              className="group relative block aspect-[4/5] overflow-hidden rounded-lg transition-transform duration-200 hover:scale-[1.02] active:scale-[0.98] focus-visible:scale-[1.02] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-950"
               style={{
                 background: article.coverImage
                   ? `url(${article.coverImage}) center/cover`
@@ -59,7 +59,7 @@ export function Vitrine({ articles }: VitrineProps) {
 
               <div className="absolute inset-0 flex flex-col justify-end p-5">
                 {article.pin ? (
-                  <span className="mb-2 inline-block self-start rounded border border-white/40 px-2 py-0.5 font-mono text-[10px] uppercase tracking-wider">
+                  <span className="mb-2 inline-block self-start rounded border border-white/40 px-2 py-0.5 font-mono text-fluid-xs uppercase tracking-wider">
                     pinned
                   </span>
                 ) : null}
@@ -67,7 +67,9 @@ export function Vitrine({ articles }: VitrineProps) {
                   {article.title}
                 </h3>
                 {article.series ? (
-                  <p className="mt-1 font-mono text-fluid-xs text-white/60">{article.series}</p>
+                  <p className="mt-1 font-mono text-fluid-xs text-white/60">
+                    {article.seriesName || article.series}
+                  </p>
                 ) : null}
               </div>
             </a>

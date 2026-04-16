@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from 'react'
+import { useLayoutEffect, useState, type ReactNode } from 'react'
 import { useDrag } from '@use-gesture/react'
 
 interface DragFigureProps {
@@ -23,6 +23,10 @@ export function DragFigure({
   testId,
 }: DragFigureProps) {
   const [pos, setPos] = useState({ x: initialX, y: initialY })
+
+  useLayoutEffect(() => {
+    setPos({ x: initialX, y: initialY })
+  }, [initialX, initialY])
 
   const bind = useDrag(({ offset: [ox, oy] }) => {
     setPos({ x: initialX + ox, y: initialY + oy })

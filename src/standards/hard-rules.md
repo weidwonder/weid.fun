@@ -24,7 +24,7 @@
 5. 字号使用 `clamp()` 或 Tailwind `text-fluid-*`，不要用固定 px
 6. 绝对定位的角落元素必须考虑 `env(safe-area-inset-*)`
 
-**自审检查**：Playwright 在三个断点截图，Claude Vision 检查是否：
+**自审检查**：Playwright 在三个断点截图，Agent 视觉评审检查是否：
 - 没有文字被截断
 - 没有按钮被挤出视口
 - 没有横向滚动条

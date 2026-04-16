@@ -83,7 +83,7 @@ export function CornerMarker({
           pointer-events-auto absolute right-0 top-0
           flex h-6 w-6 items-center justify-center rounded-full
           border border-neutral-500 bg-transparent
-          text-[10px] text-neutral-400 transition-colors duration-200
+          text-fluid-xs text-neutral-400 transition-colors duration-200
           hover:border-neutral-100 hover:text-neutral-100
         "
         style={{

@@ -6,10 +6,38 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import sharp from 'sharp'
+import { resolveArticlePath, sanitizeSlug } from '../lib/project.ts'
 
 function rgbToHex(r: number, g: number, b: number): string {
   const hex = (n: number) => n.toString(16).padStart(2, '0')
   return `#${hex(r)}${hex(g)}${hex(b)}`
+}
+
+function averageColor(
+  data: Buffer<ArrayBufferLike>,
+  channels: number,
+  predicate?: (r: number, g: number, b: number) => boolean,
+): string | null {
+  let r = 0
+  let g = 0
+  let b = 0
+  let n = 0
+
+  for (let i = 0; i < data.length; i += channels) {
+    const pr = data[i]
+    const pg = data[i + 1]
+    const pb = data[i + 2]
+
+    if (predicate && !predicate(pr, pg, pb)) continue
+
+    r += pr
+    g += pg
+    b += pb
+    n++
+  }
+
+  if (n === 0) return null
+  return rgbToHex(Math.round(r / n), Math.round(g / n), Math.round(b / n))
 }
 
 function findFirstImage(dir: string): string | null {
@@ -28,42 +56,32 @@ function findFirstImage(dir: string): string | null {
   return null
 }
 
-async function extractDominantColor(imgPath: string): Promise<string> {
+export async function extractDominantColor(imgPath: string): Promise<string> {
   const { data, info } = await sharp(imgPath)
     .resize(50, 50, { fit: 'cover' })
     .raw()
     .toBuffer({ resolveWithObject: true })
 
-  let r = 0
-  let g = 0
-  let b = 0
-  let n = 0
-
-  for (let i = 0; i < data.length; i += info.channels) {
-    const pr = data[i]
-    const pg = data[i + 1]
-    const pb = data[i + 2]
+  const filtered = averageColor(data, info.channels, (pr, pg, pb) => {
     const brightness = (pr + pg + pb) / 3
-    if (brightness < 20 || brightness > 235) continue
-    r += pr
-    g += pg
-    b += pb
-    n++
-  }
+    return brightness >= 20 && brightness <= 235
+  })
 
-  if (n === 0) return '#8338ec'
-  return rgbToHex(Math.round(r / n), Math.round(g / n), Math.round(b / n))
+  if (filtered) return filtered
+
+  return averageColor(data, info.channels) || '#8338ec'
 }
 
 async function main() {
-  const slug = process.argv[2]
-  if (!slug) {
+  const rawSlug = process.argv[2]
+  if (!rawSlug) {
     console.error('Usage: extract-palette.ts <slug>')
     process.exit(1)
   }
 
-  const articleDir = path.join('src', 'articles', slug)
-  const metaPath = path.join(articleDir, 'meta.json')
+  const slug = sanitizeSlug(rawSlug)
+  const articleDir = resolveArticlePath(slug)
+  const metaPath = resolveArticlePath(slug, 'meta.json')
   if (!fs.existsSync(metaPath)) {
     console.error(`Error: ${metaPath} not found`)
     process.exit(1)
@@ -84,7 +102,9 @@ async function main() {
   console.error(`✓ palette: ${meta.colors.primary}`)
 }
 
-main().catch((err) => {
-  console.error('[extract-palette] fatal:', err)
-  process.exit(1)
-})
+if (import.meta.main) {
+  main().catch((err) => {
+    console.error('[extract-palette] fatal:', err)
+    process.exit(1)
+  })
+}
