@@ -5,7 +5,24 @@ description: Publish an article to weid.fun. Takes raw materials (markdown + opt
 
 # /publish · Publish an article to weid.fun
 
-You are executing the publish pipeline for weid.fun. Follow the steps **in order**. 仅在 Phase 0 和 Step 0 内允许向用户提问；Step 1 启动后不再交互。
+You are executing the publish pipeline for weid.fun. Follow the steps **in order**。仅在 Step -1、Phase 0 和 Step 0 内允许向用户提问；Step 1 启动后不再交互。
+
+## Step -1 · 项目根解析（Project root resolution）
+
+本 skill 与 weid.fun 仓库强耦合，所有后续命令都假设 CWD 在项目根。进入 Phase 0 前必须先把 CWD 固定好。
+
+解析顺序：
+
+1. 若环境变量 `WEID_PROJECT_ROOT` 存在，用它作为项目根
+2. 否则检查当前 CWD 是否同时包含 `scripts/publish/deploy-config.ts` 和 `src/home/home-data.json`；是就用 CWD
+3. 否则**询问用户**一次项目绝对路径（这是除 Phase 0 / Step 0 外唯一允许提问的时机）
+
+拿到候选路径后，验证目录里**同时**存在下列两个文件，否则视为无效，重问或报错终止：
+
+- `scripts/publish/deploy-config.ts`
+- `src/home/home-data.json`
+
+验证通过后执行 `cd <root>` 切进项目根；后续所有 `bun run ...`、相对路径都基于这个 CWD。用户拒绝 / 路径无效且重试失败就**终止管线**。
 
 ## Phase 0 · Intake（可选共创阶段）
 
