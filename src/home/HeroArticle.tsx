@@ -7,10 +7,8 @@ interface HeroArticleProps {
 /**
  * HeroArticle · 首页 A 区（首屏主文章）
  *
- * 展示最新 / 置顶文章。整块可点击进入文章页。
- * 背景：coverImage（若有）否则 colors.primary。
- *
- * 响应式：移动端留白更小，标题字号随 clamp 变化。
+ * Swiss editorial 风格：12 列网格，meta 侧栏 + 大标题主区。
+ * 整块可点击进入文章。
  */
 export function HeroArticle({ article }: HeroArticleProps) {
   const excerptClean = article.excerpt
@@ -19,16 +17,16 @@ export function HeroArticle({ article }: HeroArticleProps) {
     .trim()
     .slice(0, 180)
 
-  const publishDate = new Date(article.publishedAt).toLocaleDateString('zh-CN', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  })
+  const publishDate = new Date(article.publishedAt)
+  const dateShort = `${publishDate.getFullYear()}.${String(publishDate.getMonth() + 1).padStart(
+    2,
+    '0',
+  )}.${String(publishDate.getDate()).padStart(2, '0')}`
 
   return (
     <section
       data-testid="hero-article"
-      className="relative isolate flex min-h-[calc(100dvh-3rem)] w-full items-center overflow-hidden pt-12"
+      className="relative isolate flex min-h-[100dvh] w-full items-center overflow-hidden"
       style={{
         background: article.coverImage
           ? `url(${article.coverImage}) center/cover`
@@ -41,20 +39,13 @@ export function HeroArticle({ article }: HeroArticleProps) {
         style={{
           background: article.coverImage
             ? undefined
-            : `radial-gradient(ellipse at 75% 30%, ${article.colors.primary}55, transparent 55%), radial-gradient(ellipse at 10% 90%, ${article.colors.primary}20, transparent 45%)`,
+            : `radial-gradient(ellipse 70% 60% at 50% 40%, ${article.colors.primary}40, transparent 65%)`,
         }}
       />
       <div
         aria-hidden
-        className="absolute inset-0 -z-10 bg-gradient-to-b from-black/30 via-transparent to-black/70"
+        className="absolute inset-0 -z-10 bg-gradient-to-b from-black/40 via-transparent to-black/60"
       />
-
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -right-10 top-1/2 hidden -translate-y-1/2 select-none font-mono text-[14rem] font-black leading-none text-white/[0.04] lg:block"
-      >
-        01
-      </div>
 
       <a
         href={`/src/articles/${article.slug}/`}
@@ -62,49 +53,71 @@ export function HeroArticle({ article }: HeroArticleProps) {
         className="group relative block w-full focus-visible:outline-none"
       >
         <div
-          className="mx-auto flex max-w-7xl flex-col gap-8 border-l-2 px-6 py-16 md:gap-10 md:py-24"
+          className="mx-auto grid w-full max-w-6xl grid-cols-12 gap-x-8 gap-y-10 px-6 py-16 md:gap-x-12 md:py-24"
           style={{
-            borderColor: article.colors.primary,
-            marginLeft: 0,
+            paddingTop: 'max(5rem, calc(var(--sat) + 4rem))',
             paddingBottom: 'max(4rem, calc(var(--sab) + 4rem))',
           }}
         >
-          <div className="flex flex-wrap items-center gap-3">
-            {article.pin ? (
-              <span className="rounded-full border border-white/40 px-2.5 py-0.5 font-mono text-fluid-xs uppercase tracking-widest text-white">
-                Latest
+          <aside className="col-span-12 flex flex-col gap-3 md:col-span-3 md:gap-2">
+            <div className="flex items-center gap-2">
+              <span
+                aria-hidden
+                className="inline-block h-px w-6 bg-white/40"
+              />
+              <span className="font-mono text-fluid-xs uppercase tracking-[0.2em] text-white/60">
+                {article.pin ? 'Latest' : 'Essay'}
               </span>
-            ) : null}
-            <span className="font-mono text-fluid-xs uppercase tracking-widest text-white/70">
-              {article.seriesName || article.series || 'Essay'}
-            </span>
-            <span className="font-mono text-fluid-xs text-white/40">· {publishDate}</span>
-          </div>
+            </div>
+            <dl className="mt-4 flex flex-col gap-3 font-mono text-fluid-xs text-white/50 md:mt-6">
+              <div className="flex items-baseline gap-3">
+                <dt className="w-14 shrink-0 uppercase tracking-wider text-white/30">Series</dt>
+                <dd className="flex items-center gap-1.5 text-white/80">
+                  <span
+                    aria-hidden
+                    className="inline-block size-1.5 rounded-full"
+                    style={{ background: article.colors.primary }}
+                  />
+                  {article.seriesName || article.series || '—'}
+                </dd>
+              </div>
+              <div className="flex items-baseline gap-3">
+                <dt className="w-14 shrink-0 uppercase tracking-wider text-white/30">Date</dt>
+                <dd className="tabular-nums text-white/80">{dateShort}</dd>
+              </div>
+              <div className="flex items-baseline gap-3">
+                <dt className="w-14 shrink-0 uppercase tracking-wider text-white/30">No.</dt>
+                <dd className="tabular-nums text-white/80">01</dd>
+              </div>
+            </dl>
+          </aside>
 
-          <h1
-            data-testid="hero-article-title"
-            className="max-w-5xl font-sans font-bold leading-[1.02] tracking-tight text-white"
-            style={{ fontSize: 'clamp(2.75rem, 7vw, 7rem)' }}
-          >
-            {article.title}
-          </h1>
-
-          {excerptClean ? (
-            <p className="max-w-2xl font-sans text-fluid-base leading-relaxed text-white/80 md:text-fluid-lg">
-              {excerptClean}
-              {article.excerpt.length > 180 ? '…' : ''}
-            </p>
-          ) : null}
-
-          <span className="mt-4 inline-flex items-center gap-2 font-mono text-fluid-xs uppercase tracking-widest text-white/80 transition-colors group-hover:text-white">
-            Read article
-            <span
-              aria-hidden
-              className="transition-transform duration-200 group-hover:translate-x-1"
+          <div className="col-span-12 flex flex-col gap-8 md:col-span-9 md:gap-10">
+            <h1
+              data-testid="hero-article-title"
+              className="font-sans font-bold leading-[1.02] tracking-tight text-white"
+              style={{ fontSize: 'clamp(2.5rem, 6.5vw, 6rem)' }}
             >
-              →
+              {article.title}
+            </h1>
+
+            {excerptClean ? (
+              <p className="max-w-2xl font-sans text-fluid-base leading-[1.7] text-white/75 md:text-fluid-lg">
+                {excerptClean}
+                {article.excerpt.length > 180 ? '…' : ''}
+              </p>
+            ) : null}
+
+            <span className="mt-2 inline-flex items-center gap-3 self-start border-b border-white/20 pb-1 font-mono text-fluid-xs uppercase tracking-[0.25em] text-white/80 transition-all group-hover:border-white group-hover:text-white">
+              Read article
+              <span
+                aria-hidden
+                className="inline-block transition-transform duration-200 group-hover:translate-x-1"
+              >
+                →
+              </span>
             </span>
-          </span>
+          </div>
         </div>
       </a>
     </section>

@@ -1,7 +1,8 @@
 import type { HomeData } from '@/lib/types'
+import { CornerMarker } from '@/primitives/CornerMarker'
 import homeData from './home-data.json'
 import { HeroArticle } from './HeroArticle'
-import { TopNav } from './TopNav'
+import { SeriesRail } from './SeriesRail'
 import { Vitrine } from './Vitrine'
 
 const data = homeData as HomeData
@@ -17,12 +18,13 @@ export function HomePage() {
 
   return (
     <div className="min-h-screen bg-black text-white">
-      <TopNav series={data.series ?? []} />
+      <CornerMarker />
+      <SeriesRail series={data.series ?? []} />
 
       {hero ? (
         <HeroArticle article={hero} />
       ) : (
-        <section className="flex min-h-[calc(100dvh-3rem)] items-center justify-center pt-12">
+        <section className="flex min-h-[100dvh] items-center justify-center">
           <p className="font-mono text-fluid-xs uppercase tracking-widest text-neutral-600">
             no writings yet · check back later
           </p>
