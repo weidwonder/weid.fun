@@ -42,6 +42,15 @@ mkdir -p inbox/_conversation-$TS/attachments
 - **Agent 自己生成的讨论稿图片不放进 attachments/**（真实配图由 Step 2.7 illustrator 写到 `assets/`）
 - 落盘完成后 Agent 说 "📂 素材已整理到 `inbox/_conversation-<TS>/`，开始管线…"，**自动进入 Step 0**
 
+### 系列对齐（若涉及系列）
+
+若共创中用户表达 "系列 / 专栏 / 第 N 篇 / series" 等意图，Phase 0 必须**在触发落盘前**与用户对齐两个值：
+
+1. **系列 slug**（ASCII，例如 `ai-trends`）—— 用作 URL 和目录名，必须 match `^[a-z0-9][a-z0-9-]{0,59}$`
+2. **系列显示名**（中文或完整标题，例如 `AI 趋势`）—— 用于渲染
+
+这两个值 Agent 应基于上下文主动提议一组，让用户改或确认。系列首篇还应顺带收集一句可选的 **tagline**（系列简介），会写进 spec 并渲染到系列入口页。
+
 ### Phase 0 禁区
 
 - 禁止直接写 `src/articles/*`
@@ -52,7 +61,7 @@ mkdir -p inbox/_conversation-$TS/attachments
 ## Input Parsing
 
 ```bash
-/publish [path] [--series <name>] [--pin] [--slug <custom>]
+/publish [path] [--series-slug <slug> --series-name <displayName>] [--pin] [--slug <custom>]
 ```
 
 ### 文件夹模式（传 path）
@@ -78,7 +87,7 @@ mkdir -p inbox/_conversation-$TS/attachments
 
 **Step E** · 然后把这个目录当作文件夹模式的输入，进入 Pipeline Steps。
 
-- `--series <name>` — 系列名
+- `--series-slug <slug>` + `--series-name <displayName>` — 系列 slug 和显示名，**必须成对**提供；系列首篇也用这两个值；非系列文章两者都不传
 - `--pin` — 是否在首页橱窗置顶
 - `--slug <custom>` — 自定义 slug；不提供时从 `raw.md` 标题生成
 
@@ -114,14 +123,16 @@ echo '<JSON>' | bun run scripts/publish/deploy-config.ts save
 
 运行：
 ```bash
-bun run scripts/publish/organize-source.ts <inbox-path> [--slug <custom>] [--series <name>] [--pin]
+bun run scripts/publish/organize-source.ts <inbox-path> [--slug <custom>] [--series-slug <slug> --series-name <displayName>] [--pin]
 ```
 
 这个脚本会：
 - 在 `src/articles/<slug>/source/` 下复制 `inbox/<name>/*`
-- 生成 `src/articles/<slug>/meta.json` 初版（title / slug / series / pin / publishedAt）
+- 生成 `src/articles/<slug>/meta.json` 初版（title / slug / series / seriesName / pin / publishedAt）
 
 **从脚本 stdout 读取 slug**，脚本会打印 `SLUG=<value>`。
+
+**注意**：`--series-slug` 和 `--series-name` **必须同时提供**，否则脚本报错退出。
 
 ### Step 2 · 提取色彩
 
@@ -133,16 +144,17 @@ bun run scripts/publish/extract-palette.ts <slug>
 
 ### Step 2.5 · 读系列 spec
 
-如果 `--series <name>` 被提供：
+如果 `--series-slug <slug>` 被提供：
 
 ```bash
-bun run scripts/publish/series-read.ts <series-name>
+bun run scripts/publish/series-read.ts <series-slug>
 ```
 
-- 若输出 `FIRST`：本文是系列首篇。自由设计 `page.tsx`（按 Step 3 模板，但 primitives 和 colors 自由）。完成后，记住要在 Step 9 写 series spec。
+- 若输出 `FIRST`：本文是系列首篇。自由设计 `page.tsx`（按 Step 3 模板，但 primitives 和 colors 自由）。完成后，Step 11 会写 series spec 并生成系列入口页。
 - 若输出 JSON：读取 spec，在 Step 3 写 `page.tsx` 时**必须遵守**：
   - 使用 `spec.colors` 作为 `meta.json.colors`（覆盖 extract-palette 的结果）
   - 只使用 `spec.primitives` 列出的 primitives（不能引入新的）
+  - `meta.seriesName` 必须与 `spec.seriesName` 一致（脚本 organize-source 已保证，Agent 不需再改）
 
 ### Step 2.7 · 补充配图（可选）
 
@@ -377,15 +389,37 @@ Smoke test:
 Please verify manually.
 ```
 
-### Step 11 · 若系列首篇，写 spec
+### Step 11 · 若系列首篇，写 spec + 生成系列入口页
 
-如果 Step 2.5 返回了 `FIRST`，执行：
+如果 Step 2.5 返回了 `FIRST`，依次执行：
 
 ```bash
-bun run scripts/publish/series-write.ts <series-name> <slug>
+bun run scripts/publish/series-write.ts <series-slug> <article-slug>
+bun run scripts/publish/series-create-page.ts <series-slug>
 ```
 
-这会把本文的风格决策写入 `series/<series-name>/spec.json`。
+作用：
+
+1. `series-write.ts` 从首篇的 `meta.json` 提取 colors / seriesName / seriesTagline 和从 `page.tsx` 扫出 primitives，写入 `src/series/<series-slug>/spec.json`
+2. `series-create-page.ts` 在同目录下生成 `index.html` / `main.tsx` / `page.tsx` —— 系列入口页，会运行时从 `home-data.json` 过滤本系列文章并按发布时间倒序列出
+
+生成完后需要**再跑一次 `bun run build`** 让 vite 发现新的 entry，并在 Step 8 之前完成（建议把 Step 11 的两条命令插在 Step 5 之后、Step 6 之前；若是非首篇，Step 11 整体跳过）。
+
+**系列首篇的实际执行顺序**：
+
+```
+Step 1  organize-source (传 --series-slug + --series-name)
+Step 2  extract-palette
+Step 2.5 series-read → FIRST
+Step 2.7 illustrator (可选)
+Step 3  写文章 page.tsx
+Step 4  写文章 index.html + main.tsx
+Step 5  update-home-data
+Step 11a series-write           ← 首篇额外
+Step 11b series-create-page     ← 首篇额外
+Step 6  bun run build
+Step 7+ 自审 / deploy / smoke / 报告
+```
 
 ## 禁令
 

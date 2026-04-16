@@ -16,8 +16,10 @@ export interface ArticleMeta {
   slug: string
   /** 文章标题 */
   title: string
-  /** 所属系列名（可选） */
+  /** 所属系列 slug（ASCII，对应 src/series/<series>/ 目录名） */
   series?: string
+  /** 所属系列显示名（中文或完整标题，用于渲染） */
+  seriesName?: string
   /** 发布日期 ISO 8601（YYYY-MM-DD） */
   publishedAt: string
   /** 是否在首页橱窗置顶 */
@@ -30,6 +32,25 @@ export interface ArticleMeta {
   excerpt: string
 }
 
+export interface SeriesSpec {
+  /** 系列 slug */
+  seriesSlug: string
+  /** 系列显示名 */
+  seriesName: string
+  /** 系列 tagline / 简介（可选） */
+  tagline?: string
+  /** 系列首篇的 slug */
+  originSlug: string
+  /** 创建时间 ISO 8601 */
+  createdAt: string
+  /** 视觉约束：首篇确定的主色系 */
+  colors: ArticleColors
+  /** 视觉约束：允许使用的 primitives 白名单 */
+  primitives: string[]
+  /** 给后续文章 / agent 的说明 */
+  note: string
+}
+
 export interface PortalConfig {
   /** 门户主标题 */
   title: string
@@ -39,7 +60,21 @@ export interface PortalConfig {
   lastUpdated: string
 }
 
+export interface HomeSeriesSummary {
+  /** 系列 slug（对应 src/series/<slug>/） */
+  seriesSlug: string
+  /** 系列显示名 */
+  seriesName: string
+  /** 系列 tagline（可选） */
+  tagline?: string
+  /** 系列主色 */
+  colors: ArticleColors
+  /** 当前已发布文章数（由 update-home-data 计算） */
+  articleCount: number
+}
+
 export interface HomeData {
   articles: ArticleMeta[]
+  series?: HomeSeriesSummary[]
   portal: PortalConfig
 }

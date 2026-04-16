@@ -43,6 +43,22 @@ export function sanitizeSlug(input: string, label = 'slug'): string {
   return sanitized
 }
 
+/**
+ * validateSlug · 严格校验,不做任何转换。
+ *
+ * 用于必须由调用方(skill / CLI 用户)明确提供 ASCII slug 的场景,
+ * 例如 series slug —— 避免 "ai趋势" 被吞掉 unicode 字符后只剩 "ai"。
+ */
+export function validateSlug(input: string, label = 'slug'): string {
+  if (!SAFE_SLUG_RE.test(input)) {
+    throw new Error(
+      `Invalid ${label}: ${JSON.stringify(input)}. Must match ${SAFE_SLUG_RE} — provide an ASCII slug explicitly.`,
+    )
+  }
+
+  return input
+}
+
 export function resolveArticleDir(inputSlug: string): string {
   const articlesRoot = resolveProjectPath('src', 'articles')
   const articleDir = path.resolve(articlesRoot, sanitizeSlug(inputSlug))
@@ -53,12 +69,12 @@ export function resolveArticlePath(inputSlug: string, ...segments: string[]): st
   return path.join(resolveArticleDir(inputSlug), ...segments)
 }
 
-export function resolveSeriesDir(seriesName: string): string {
-  const seriesRoot = resolveProjectPath('series')
-  const seriesDir = path.resolve(seriesRoot, sanitizeSlug(seriesName, 'series name'))
+export function resolveSeriesDir(seriesSlug: string): string {
+  const seriesRoot = resolveProjectPath('src', 'series')
+  const seriesDir = path.resolve(seriesRoot, validateSlug(seriesSlug, 'series slug'))
   return ensureInside(seriesRoot, seriesDir, 'series directory')
 }
 
-export function resolveSeriesPath(seriesName: string, ...segments: string[]): string {
-  return path.join(resolveSeriesDir(seriesName), ...segments)
+export function resolveSeriesPath(seriesSlug: string, ...segments: string[]): string {
+  return path.join(resolveSeriesDir(seriesSlug), ...segments)
 }

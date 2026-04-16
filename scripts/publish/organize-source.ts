@@ -5,18 +5,27 @@
 
 import fs from 'node:fs'
 import path from 'node:path'
-import { resolveArticleDir, resolveCliPath, sanitizeSlug, slugifySegment } from '../lib/project.ts'
+import {
+  resolveArticleDir,
+  resolveCliPath,
+  sanitizeSlug,
+  slugifySegment,
+  validateSlug,
+} from '../lib/project.ts'
 
 interface Args {
   inboxPath: string
   slug?: string
-  series?: string
+  seriesSlug?: string
+  seriesName?: string
   pin: boolean
 }
 
 function parseArgs(argv: string[]): Args {
   if (argv.length === 0) {
-    console.error('Usage: organize-source.ts <inbox-path> [--slug <s>] [--series <s>] [--pin]')
+    console.error(
+      'Usage: organize-source.ts <inbox-path> [--slug <s>] [--series-slug <s> --series-name <name>] [--pin]',
+    )
     process.exit(1)
   }
 
@@ -24,9 +33,16 @@ function parseArgs(argv: string[]): Args {
   for (let i = 1; i < argv.length; i++) {
     const arg = argv[i]
     if (arg === '--slug') args.slug = argv[++i]
-    else if (arg === '--series') args.series = argv[++i]
+    else if (arg === '--series-slug') args.seriesSlug = argv[++i]
+    else if (arg === '--series-name') args.seriesName = argv[++i]
     else if (arg === '--pin') args.pin = true
   }
+
+  if ((args.seriesSlug && !args.seriesName) || (!args.seriesSlug && args.seriesName)) {
+    console.error('Error: --series-slug and --series-name must be provided together.')
+    process.exit(1)
+  }
+
   return args
 }
 
@@ -97,10 +113,13 @@ async function main() {
   const sourceDir = path.join(articleDir, 'source')
   copyRecursive(inboxPath, sourceDir)
 
+  const seriesSlug = args.seriesSlug ? validateSlug(args.seriesSlug, 'series slug') : undefined
+
   const meta = {
     slug,
     title,
-    series: args.series || undefined,
+    series: seriesSlug,
+    seriesName: args.seriesName || undefined,
     publishedAt: new Date().toISOString().slice(0, 10),
     pin: args.pin,
     colors: {

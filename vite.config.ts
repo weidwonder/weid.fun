@@ -42,6 +42,17 @@ function discoverEntries(): Record<string, string> {
     }
   }
 
+  const seriesRoot = path.resolve(projectRoot, 'src/series')
+  if (fs.existsSync(seriesRoot)) {
+    for (const item of fs.readdirSync(seriesRoot, { withFileTypes: true })) {
+      if (!item.isDirectory()) continue
+      const entry = path.join(seriesRoot, item.name, 'index.html')
+      if (fs.existsSync(entry)) {
+        entries[`series_${item.name}`] = entry
+      }
+    }
+  }
+
   return entries
 }
 

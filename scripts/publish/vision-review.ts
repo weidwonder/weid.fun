@@ -52,8 +52,16 @@ interface ReviewBundle {
 }
 
 function usage(): never {
-  console.error('Usage: vision-review.ts <slug> | --path <page-path> [--label <name>]')
+  console.error(
+    'Usage: vision-review.ts <slug> [--kind article|series] | --path <page-path> [--label <name>]',
+  )
   process.exit(1)
+}
+
+type PageKind = 'article' | 'series'
+
+function pagePathForKind(kind: PageKind, slug: string): string {
+  return kind === 'series' ? `/src/series/${slug}/` : `/src/articles/${slug}/`
 }
 
 function normalizePagePath(pagePath: string): string {
@@ -89,10 +97,17 @@ function parseArgs(argv: string[]): { slug: string | null; pagePath: string; lab
   if (argv[0].startsWith('--')) usage()
 
   const slug = sanitizeSlug(argv[0])
+  const kindIndex = argv.indexOf('--kind')
+  const kindRaw = kindIndex >= 0 ? argv[kindIndex + 1] : 'article'
+  if (kindRaw !== 'article' && kindRaw !== 'series') {
+    console.error(`Invalid --kind: ${JSON.stringify(kindRaw)}. Must be "article" or "series".`)
+    process.exit(1)
+  }
+  const kind: PageKind = kindRaw
   return {
     slug,
-    pagePath: `/src/articles/${slug}/`,
-    label: slugifyLabel(slug),
+    pagePath: pagePathForKind(kind, slug),
+    label: slugifyLabel(kind === 'series' ? `series-${slug}` : slug),
   }
 }
 

@@ -5,7 +5,7 @@
 
 import fs from 'node:fs'
 import path from 'node:path'
-import { resolveArticlePath, resolveSeriesDir, sanitizeSlug } from '../lib/project.ts'
+import { resolveArticlePath, resolveSeriesDir, sanitizeSlug, validateSlug } from '../lib/project.ts'
 
 export function extractPrimitivesFromContent(content: string): string[] {
   const primitives = new Set<string>()
@@ -34,14 +34,14 @@ function extractPrimitives(pageTsxPath: string): string[] {
 }
 
 function main() {
-  const [rawSeriesName, rawSlug] = process.argv.slice(2)
-  if (!rawSeriesName || !rawSlug) {
-    console.error('Usage: series-write.ts <series-name> <slug>')
+  const [rawSeriesSlug, rawArticleSlug] = process.argv.slice(2)
+  if (!rawSeriesSlug || !rawArticleSlug) {
+    console.error('Usage: series-write.ts <series-slug> <article-slug>')
     process.exit(1)
   }
 
-  const seriesName = sanitizeSlug(rawSeriesName, 'series name')
-  const slug = sanitizeSlug(rawSlug)
+  const seriesSlug = validateSlug(rawSeriesSlug, 'series slug')
+  const slug = sanitizeSlug(rawArticleSlug)
   const metaPath = resolveArticlePath(slug, 'meta.json')
   const pageTsxPath = resolveArticlePath(slug, 'page.tsx')
   if (!fs.existsSync(metaPath) || !fs.existsSync(pageTsxPath)) {
@@ -50,10 +50,25 @@ function main() {
   }
 
   const meta = JSON.parse(fs.readFileSync(metaPath, 'utf-8'))
+  if (!meta.seriesName) {
+    console.error(
+      `Error: article ${slug}/meta.json is missing 'seriesName'. Pass --series-name to organize-source for series articles.`,
+    )
+    process.exit(1)
+  }
+  if (meta.series !== seriesSlug) {
+    console.error(
+      `Error: article ${slug}/meta.json has series="${meta.series}" but expected "${seriesSlug}".`,
+    )
+    process.exit(1)
+  }
+
   const primitives = extractPrimitives(pageTsxPath)
 
   const spec = {
-    seriesName,
+    seriesSlug,
+    seriesName: meta.seriesName,
+    tagline: meta.seriesTagline || undefined,
     originSlug: slug,
     createdAt: new Date().toISOString(),
     colors: meta.colors,
@@ -61,7 +76,7 @@ function main() {
     note: 'Generated from the first article. Subsequent articles in this series should honor these constraints.',
   }
 
-  const seriesDir = resolveSeriesDir(seriesName)
+  const seriesDir = resolveSeriesDir(seriesSlug)
   fs.mkdirSync(seriesDir, { recursive: true })
   fs.writeFileSync(path.join(seriesDir, 'spec.json'), `${JSON.stringify(spec, null, 2)}\n`)
 

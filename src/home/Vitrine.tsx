@@ -67,7 +67,9 @@ export function Vitrine({ articles }: VitrineProps) {
                   {article.title}
                 </h3>
                 {article.series ? (
-                  <p className="mt-1 font-mono text-fluid-xs text-white/60">{article.series}</p>
+                  <p className="mt-1 font-mono text-fluid-xs text-white/60">
+                    {article.seriesName || article.series}
+                  </p>
                 ) : null}
               </div>
             </a>
